@@ -9,6 +9,8 @@ settings:
     MARKETING_VERSION: 1.0
     CURRENT_PROJECT_VERSION: 1
     LLVM_PROFILE_GENERATION: NO
+    CLANG_COVERAGE_MAPPING: NO
+    CODE_COVERAGE_ENABLED: NO
 
 targets:
   ExpenseFlow:
@@ -25,6 +27,9 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.example.expenseflow
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         CODE_SIGN_IDENTITY: 
+        LLVM_PROFILE_GENERATION: NO
+        CLANG_COVERAGE_MAPPING: NO
+        CODE_COVERAGE_ENABLED: NO
 
   ExpenseFlowTests:
     type: bundle.unit-test
@@ -38,3 +43,6 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.example.expenseflow.tests
         CODE_SIGN_IDENTITY:
         ENABLE_TESTABILITY: YES
+        LLVM_PROFILE_GENERATION: NO
+        CLANG_COVERAGE_MAPPING: NO
+        CODE_COVERAGE_ENABLED: NO
