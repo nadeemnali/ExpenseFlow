@@ -2,6 +2,7 @@ import SwiftUI
 
 struct AddExpenseView: View {
     @EnvironmentObject private var expenseStore: ExpenseStore
+    @EnvironmentObject private var premiumStore: PremiumFeatureStore
 
     @State private var title: String = ""
     @State private var amountText: String = ""
@@ -11,6 +12,7 @@ struct AddExpenseView: View {
     @State private var errorMessage: String = ""
     @State private var showSavedAlert: Bool = false
     @State private var savedTitle: String = ""
+    @State private var showBillScanner: Bool = false
 
     var body: some View {
         BackgroundView {
@@ -67,6 +69,20 @@ struct AddExpenseView: View {
                         }
                     }
 
+                    if premiumStore.isPremium {
+                        Button(action: { showBillScanner = true }) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "doc.text.viewfinder")
+                                Text("Scan Bill")
+                            }
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 44)
+                            .background(AppTheme.cloud.opacity(0.8))
+                            .foregroundStyle(AppTheme.ink)
+                            .cornerRadius(8)
+                        }
+                    }
+
                     if !errorMessage.isEmpty {
                         Text(errorMessage)
                             .font(AppTheme.body(12))
@@ -90,6 +106,17 @@ struct AddExpenseView: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text(savedTitle.isEmpty ? "Your expense has been logged." : "\"\(savedTitle)\" was added.")
+        }
+        .sheet(isPresented: $showBillScanner) {
+            if premiumStore.isPremium {
+                BillScannerView(premiumStore: premiumStore)
+            } else {
+                PremiumLockedView(
+                    premiumStore: premiumStore,
+                    action: { showBillScanner = false },
+                    featureName: "Bill Scanner"
+                )
+            }
         }
     }
 
