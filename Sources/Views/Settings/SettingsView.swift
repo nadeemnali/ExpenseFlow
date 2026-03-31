@@ -5,6 +5,7 @@ struct SettingsView: View {
     @EnvironmentObject private var expenseStore: ExpenseStore
     @EnvironmentObject private var settingsStore: SettingsStore
     @EnvironmentObject private var onboardingStore: OnboardingStore
+    @EnvironmentObject private var premiumStore: PremiumFeatureStore
 
     private let currencyOptions = ["USD", "EUR", "GBP", "JPY", "AUD", "CAD", "INR"]
 
@@ -15,6 +16,7 @@ struct SettingsView: View {
                     SectionHeader(title: "Settings", subtitle: "Make ExpenseFlow yours")
 
                     accountCard
+                    premiumCard
                     preferencesCard
                     dataCard
                 }
@@ -46,6 +48,84 @@ struct SettingsView: View {
                     }
                     .font(AppTheme.body(13))
                     .foregroundStyle(AppTheme.coral)
+                }
+            }
+        }
+    }
+
+    private var premiumCard: some View {
+        GlassCard {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Premium Features")
+                            .font(AppTheme.title(18))
+                        
+                        if premiumStore.isPremium {
+                            HStack(spacing: 4) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .font(.system(size: 12))
+                                    .foregroundStyle(.green)
+                                Text("Premium Unlocked")
+                                    .font(AppTheme.body(12))
+                                    .foregroundStyle(.green)
+                            }
+                        } else {
+                            Text("Unlock bill scanning & more")
+                                .font(AppTheme.body(12))
+                                .foregroundStyle(AppTheme.ink.opacity(0.6))
+                        }
+                    }
+                    
+                    Spacer()
+                    
+                    if premiumStore.isPremium {
+                        Image(systemName: "crown.fill")
+                            .font(.system(size: 20))
+                            .foregroundStyle(.yellow)
+                    }
+                }
+                
+                if !premiumStore.isPremium {
+                    Button(action: purchasePremium) {
+                        if premiumStore.isLoading {
+                            ProgressView()
+                                .tint(AppTheme.ink)
+                        } else {
+                            Text("Unlock for $0.99")
+                                .font(AppTheme.body(13))
+                                .fontWeight(.semibold)
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 40)
+                    .background(AppTheme.teal.opacity(0.8))
+                    .foregroundStyle(AppTheme.ink)
+                    .cornerRadius(8)
+                    .disabled(premiumStore.isLoading)
+                } else {
+                    Button(action: restorePurchase) {
+                        if premiumStore.isLoading {
+                            ProgressView()
+                                .tint(AppTheme.ink)
+                        } else {
+                            Text("Restore Purchase")
+                                .font(AppTheme.body(13))
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 40)
+                    .background(AppTheme.cloud.opacity(0.8))
+                    .foregroundStyle(AppTheme.ink)
+                    .cornerRadius(8)
+                    .disabled(premiumStore.isLoading)
+                }
+                
+                if let error = premiumStore.error {
+                    Text(error.errorDescription ?? "Unknown error")
+                        .font(AppTheme.body(11))
+                        .foregroundStyle(AppTheme.coral)
+                        .lineLimit(2)
                 }
             }
         }
@@ -234,5 +314,17 @@ struct SettingsView: View {
             return "\"\(field.replacingOccurrences(of: "\"", with: "\"\""))\""
         }
         return field
+    }
+    
+    private func purchasePremium() {
+        Task {
+            await premiumStore.purchase()
+        }
+    }
+    
+    private func restorePurchase() {
+        Task {
+            await premiumStore.restorePurchases()
+        }
     }
 }
