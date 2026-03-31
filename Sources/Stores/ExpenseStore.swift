@@ -7,6 +7,7 @@ final class ExpenseStore: ObservableObject {
     @Published var saveError: String?
 
     private let fileName = "expenses.json"
+    private let lastAutoGenerateKey = "ExpenseFlow.lastAutoGenerate"
     private var cancellables = Set<AnyCancellable>()
 
     init() {
@@ -17,6 +18,34 @@ final class ExpenseStore: ObservableObject {
                 self?.save()
             }
             .store(in: &cancellables)
+    }
+    
+    func autoGenerateRecurringExpenses(from recurringExpenseStore: RecurringExpenseStore) {
+        let today = Date()
+        let calendar = Calendar.current
+        let lastGenerate = UserDefaults.standard.object(forKey: lastAutoGenerateKey) as? Date
+        
+        // Generate once per day maximum
+        if let lastGenerate = lastGenerate,
+           calendar.isDateInToday(lastGenerate) {
+            return
+        }
+        
+        for recurring in recurringExpenseStore.activeRecurringExpenses {
+            if recurring.shouldGenerate(for: today) {
+                let expense = Expense(
+                    title: recurring.title,
+                    amount: recurring.amount,
+                    category: recurring.category,
+                    date: today,
+                    notes: "From: \(recurring.frequency.label) recurring expense"
+                )
+                addExpense(expense)
+            }
+        }
+        
+        UserDefaults.standard.set(today, forKey: lastAutoGenerateKey)
+        AppLogger.log("Auto-generated recurring expenses", category: .storage, level: .debug)
     }
 
     func addExpense(_ expense: Expense) {
