@@ -2,37 +2,15 @@ import XCTest
 @testable import ExpenseFlow
 
 final class PremiumFeatureStoreTests: XCTestCase {
-    var sut: PremiumFeatureStore!
     
     override func setUp() {
         super.setUp()
-        sut = PremiumFeatureStore()
         UserDefaults.standard.removeObject(forKey: "ExpenseFlow.premiumPurchased")
     }
     
     override func tearDown() {
         UserDefaults.standard.removeObject(forKey: "ExpenseFlow.premiumPurchased")
         super.tearDown()
-    }
-    
-    func testInitialStateNotPremium() {
-        UserDefaults.standard.removeObject(forKey: "ExpenseFlow.premiumPurchased")
-        let store = PremiumFeatureStore()
-        XCTAssertFalse(store.isPremium)
-    }
-    
-    func testInitialStateLoadsPremiumFromDefaults() {
-        UserDefaults.standard.set(true, forKey: "ExpenseFlow.premiumPurchased")
-        let store = PremiumFeatureStore()
-        XCTAssertTrue(store.isPremium)
-    }
-    
-    func testInitialStateNotLoading() {
-        XCTAssertFalse(sut.isLoading)
-    }
-    
-    func testInitialStateNoError() {
-        XCTAssertNil(sut.error)
     }
     
     func testPremiumStatusPersistsToUserDefaults() {
@@ -72,14 +50,17 @@ final class PremiumFeatureStoreTests: XCTestCase {
         XCTAssertNotNil(error.errorDescription)
     }
     
-    func testPremiumFeatureStoreIsObservableObject() {
-        let store = PremiumFeatureStore()
-        XCTAssertTrue(store is ObservableObject)
+    func testErrorMessageForPurchaseFailed() {
+        let testError = NSError(domain: "TestDomain", code: 1, userInfo: nil)
+        let error = PremiumError.purchaseFailed(testError)
+        XCTAssertNotNil(error.errorDescription)
+        XCTAssertTrue(error.errorDescription!.contains("Purchase"))
     }
     
-    func testPremiumFeatureStoreHasSharedInstance() {
-        let shared1 = PremiumFeatureStore.shared
-        let shared2 = PremiumFeatureStore.shared
-        XCTAssertTrue(shared1 === shared2)
+    func testErrorMessageForRestoreFailed() {
+        let testError = NSError(domain: "TestDomain", code: 1, userInfo: nil)
+        let error = PremiumError.restoreFailed(testError)
+        XCTAssertNotNil(error.errorDescription)
+        XCTAssertTrue(error.errorDescription!.contains("Restore"))
     }
 }

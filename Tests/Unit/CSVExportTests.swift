@@ -22,7 +22,7 @@ final class CSVExportTests: XCTestCase {
         let csvContent = generateTestCSV()
         
         let lines = csvContent.components(separatedBy: "\n")
-        XCTAssertGreater(lines.count, 0)
+        XCTAssertTrue(lines.count > 0)
         
         let header = lines[0]
         XCTAssertTrue(header.contains("Date"))
@@ -165,7 +165,7 @@ final class CSVExportTests: XCTestCase {
         
         let lines = csvContent.components(separatedBy: "\n")
         // Should at least have header
-        XCTAssertGreater(lines.count, 0)
+        XCTAssertTrue(lines.count > 0)
         XCTAssertTrue(lines[0].contains("Date"))
     }
     

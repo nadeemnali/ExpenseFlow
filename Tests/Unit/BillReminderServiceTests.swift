@@ -50,7 +50,7 @@ final class BillReminderServiceTests: XCTestCase {
         let expectation = XCTestExpectation(description: "Check pending notifications")
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             self.sut.getPendingNotifications { requests in
-                XCTAssertGreater(requests.count, 0)
+                XCTAssertTrue(requests.count > 0)
                 let identifier = requests.first?.identifier ?? ""
                 XCTAssertTrue(identifier.contains(recurring.id.uuidString))
                 expectation.fulfill()

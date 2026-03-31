@@ -130,7 +130,7 @@ final class RecurringExpenseStoreTests: XCTestCase {
         sut.add(recurring2)
         
         let monthlyAmount = sut.monthlyRecurringAmount
-        XCTAssertGreater(monthlyAmount, 20)
+        XCTAssertTrue(monthlyAmount > 20)
     }
     
     func testTotalYearlyAmount() {
@@ -138,7 +138,7 @@ final class RecurringExpenseStoreTests: XCTestCase {
         sut.add(recurring)
         
         let yearlyAmount = sut.totalYearlyAmount
-        XCTAssertGreater(yearlyAmount, 140) // Approximately 144 for annual
+        XCTAssertTrue(yearlyAmount > 140) // Approximately 144 for annual
     }
     
     // MARK: - Due Soon Tests

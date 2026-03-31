@@ -183,7 +183,7 @@ final class BillOCRServiceTests: XCTestCase {
     }
 }
 
-private struct ParsedOCRData {
+fileprivate struct ParsedOCRData {
     let vendor: String
     let amount: Decimal
     let date: Date
@@ -192,7 +192,7 @@ private struct ParsedOCRData {
 }
 
 extension BillOCRService {
-    func parseOCRText(_ text: String) -> ParsedOCRData {
+    fileprivate func parseOCRText(_ text: String) -> ParsedOCRData {
         let lines = text.split(separator: "\n").map(String.init)
         
         var vendor = extractVendor(from: lines)

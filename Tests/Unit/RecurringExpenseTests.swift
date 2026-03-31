@@ -35,7 +35,7 @@ final class RecurringExpenseTests: XCTestCase {
         
         // Simulating current date for next due calculation
         let nextDue = recurring.nextDueDate()
-        XCTAssertGreater(nextDue, today)
+        XCTAssertTrue(nextDue > today)
     }
     
     // MARK: - Yearly Amount Tests
@@ -51,8 +51,8 @@ final class RecurringExpenseTests: XCTestCase {
         
         let yearlyAmount = recurring.yearlyAmount
         // 12 * 12 = 144 (approximately, accounting for 30-day intervals)
-        XCTAssertGreater(yearlyAmount, 130)
-        XCTAssertLess(yearlyAmount, 150)
+        XCTAssertTrue(yearlyAmount > 130)
+        XCTAssertTrue(yearlyAmount < 150)
     }
     
     func testYearlyAmountCalculationWeekly() {
@@ -80,7 +80,7 @@ final class RecurringExpenseTests: XCTestCase {
             title: "Test",
             amount: 10,
             category: .food,
-            frequency: .daily,
+            frequency: .weekly,
             startDate: today,
             isActive: true
         )
@@ -96,7 +96,7 @@ final class RecurringExpenseTests: XCTestCase {
             title: "Test",
             amount: 10,
             category: .food,
-            frequency: .daily,
+            frequency: .weekly,
             startDate: today,
             isActive: false
         )
