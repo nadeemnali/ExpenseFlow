@@ -23,6 +23,13 @@ struct MainTabView: View {
             .tabItem {
                 Label("History", systemImage: "chart.bar.xaxis")
             }
+            
+            NavigationStack {
+                PremiumFeaturesView()
+            }
+            .tabItem {
+                Label("Premium", systemImage: "crown.fill")
+            }
 
             NavigationStack {
                 SettingsView()
