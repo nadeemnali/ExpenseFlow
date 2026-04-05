@@ -72,6 +72,7 @@ final class BillOCRServiceTests: XCTestCase {
     
     func testMissingVendorReducesConfidence() {
         let text = """
+        ""
         $50.00
         03/15/2024
         """

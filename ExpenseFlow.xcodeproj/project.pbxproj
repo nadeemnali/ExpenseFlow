@@ -403,8 +403,6 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1700;
-				TargetAttributes = {
-				};
 			};
 			buildConfigurationList = 1B346FDE5C243511A5C96290 /* Build configuration list for PBXProject "ExpenseFlow" */;
 			developmentRegion = en;
