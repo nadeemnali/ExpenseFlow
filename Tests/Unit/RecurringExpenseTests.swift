@@ -6,7 +6,7 @@ final class RecurringExpenseTests: XCTestCase {
     // MARK: - Next Due Date Tests
     
     func testNextDueDateFromStartDate() {
-        let startDate = Calendar.current.date(from: DateComponents(year: 2026, month: 3, day: 1))!
+        let startDate = Calendar.current.date(byAdding: .day, value: 7, to: Date())!
         let recurring = RecurringExpense(
             title: "Rent",
             amount: 1000,
@@ -22,8 +22,8 @@ final class RecurringExpenseTests: XCTestCase {
     }
     
     func testNextDueDateAfterMultipleOccurrences() {
-        let startDate = Calendar.current.date(from: DateComponents(year: 2026, month: 1, day: 1))!
-        let today = Calendar.current.date(from: DateComponents(year: 2026, month: 3, day: 15))!
+        let startDate = Calendar.current.date(byAdding: .day, value: -45, to: Date())!
+        let today = Date()
         
         let recurring = RecurringExpense(
             title: "Subscription",

@@ -10,6 +10,7 @@ struct ExpenseFlowApp: App {
     @StateObject private var onboardingStore = OnboardingStore()
     @StateObject private var recurringExpenseStore = RecurringExpenseStore()
     @StateObject private var premiumStore = PremiumFeatureStore()
+    @StateObject private var customCategoryStore = CustomCategoryStore()
 
     var body: some Scene {
         WindowGroup {
@@ -20,6 +21,7 @@ struct ExpenseFlowApp: App {
                 .environmentObject(onboardingStore)
                 .environmentObject(recurringExpenseStore)
                 .environmentObject(premiumStore)
+                .environmentObject(customCategoryStore)
                 .preferredColorScheme(settingsStore.preferredColorScheme)
                 .onAppear {
                     setupNotifications()
@@ -41,5 +43,4 @@ struct ExpenseFlowApp: App {
         expenseStore.autoGenerateRecurringExpenses(from: recurringExpenseStore)
     }
 }
-
 

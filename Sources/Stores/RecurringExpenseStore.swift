@@ -38,6 +38,10 @@ final class RecurringExpenseStore: ObservableObject {
     func delete(_ expense: RecurringExpense) {
         delete(expense.id)
     }
+
+    func replaceAll(_ expenses: [RecurringExpense]) {
+        recurringExpenses = expenses
+    }
     
     func get(_ id: UUID) -> RecurringExpense? {
         recurringExpenses.first { $0.id == id }

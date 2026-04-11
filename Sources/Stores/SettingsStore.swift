@@ -6,6 +6,7 @@ final class SettingsStore: ObservableObject {
     @Published var monthlyBudget: Double = 1200
     @Published var currencyCode: String = Locale.current.currency?.identifier ?? "USD"
     @Published var notificationsEnabled: Bool = true
+    @Published var budgetAlertsEnabled: Bool = true
     @Published var startOfWeek: WeekStart = .monday
     @Published var colorScheme: ColorSchemeOption = .system
     @Published var saveError: String?
@@ -26,6 +27,12 @@ final class SettingsStore: ObservableObject {
                 self?.save()
             }
             .store(in: &cancellables)
+
+        $budgetAlertsEnabled
+            .sink { [weak self] _ in
+                self?.save()
+            }
+            .store(in: &cancellables)
     }
 
     var preferredColorScheme: ColorScheme? {
@@ -34,6 +41,17 @@ final class SettingsStore: ObservableObject {
         case .light: return .light
         case .dark: return .dark
         }
+    }
+
+    var snapshot: AppSettings {
+        AppSettings(
+            monthlyBudget: monthlyBudget,
+            currencyCode: currencyCode,
+            notificationsEnabled: notificationsEnabled,
+            budgetAlertsEnabled: budgetAlertsEnabled,
+            startOfWeek: startOfWeek,
+            colorScheme: colorScheme
+        )
     }
 
     private func load() {
@@ -53,11 +71,12 @@ final class SettingsStore: ObservableObject {
                 throw SettingsError.invalidCurrency
             }
             
-            monthlyBudget = decoded.monthlyBudget
-            currencyCode = decoded.currencyCode
-            notificationsEnabled = decoded.notificationsEnabled
-            startOfWeek = decoded.startOfWeek
-            colorScheme = decoded.colorScheme
+        monthlyBudget = decoded.monthlyBudget
+        currencyCode = decoded.currencyCode
+        notificationsEnabled = decoded.notificationsEnabled
+        budgetAlertsEnabled = decoded.budgetAlertsEnabled
+        startOfWeek = decoded.startOfWeek
+        colorScheme = decoded.colorScheme
             
             AppLogger.log("Settings loaded successfully", category: .storage, level: .info)
         } catch {
@@ -71,6 +90,7 @@ final class SettingsStore: ObservableObject {
             monthlyBudget: monthlyBudget,
             currencyCode: currencyCode,
             notificationsEnabled: notificationsEnabled,
+            budgetAlertsEnabled: budgetAlertsEnabled,
             startOfWeek: startOfWeek,
             colorScheme: colorScheme
         )
@@ -84,6 +104,15 @@ final class SettingsStore: ObservableObject {
             AppLogger.error("Failed to save settings", error: error, category: .storage)
             saveError = "Could not save settings. Changes may be lost."
         }
+    }
+
+    func apply(_ settings: AppSettings) {
+        monthlyBudget = settings.monthlyBudget
+        currencyCode = settings.currencyCode
+        notificationsEnabled = settings.notificationsEnabled
+        budgetAlertsEnabled = settings.budgetAlertsEnabled
+        startOfWeek = settings.startOfWeek
+        colorScheme = settings.colorScheme
     }
     
     enum SettingsError: LocalizedError {
@@ -105,8 +134,44 @@ struct AppSettings: Codable {
     let monthlyBudget: Double
     let currencyCode: String
     let notificationsEnabled: Bool
+    let budgetAlertsEnabled: Bool
     let startOfWeek: WeekStart
     let colorScheme: ColorSchemeOption
+
+    enum CodingKeys: String, CodingKey {
+        case monthlyBudget
+        case currencyCode
+        case notificationsEnabled
+        case budgetAlertsEnabled
+        case startOfWeek
+        case colorScheme
+    }
+
+    init(
+        monthlyBudget: Double,
+        currencyCode: String,
+        notificationsEnabled: Bool,
+        budgetAlertsEnabled: Bool,
+        startOfWeek: WeekStart,
+        colorScheme: ColorSchemeOption
+    ) {
+        self.monthlyBudget = monthlyBudget
+        self.currencyCode = currencyCode
+        self.notificationsEnabled = notificationsEnabled
+        self.budgetAlertsEnabled = budgetAlertsEnabled
+        self.startOfWeek = startOfWeek
+        self.colorScheme = colorScheme
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        monthlyBudget = try container.decode(Double.self, forKey: .monthlyBudget)
+        currencyCode = try container.decode(String.self, forKey: .currencyCode)
+        notificationsEnabled = try container.decode(Bool.self, forKey: .notificationsEnabled)
+        budgetAlertsEnabled = try container.decodeIfPresent(Bool.self, forKey: .budgetAlertsEnabled) ?? true
+        startOfWeek = try container.decode(WeekStart.self, forKey: .startOfWeek)
+        colorScheme = try container.decode(ColorSchemeOption.self, forKey: .colorScheme)
+    }
 }
 
 enum WeekStart: String, CaseIterable, Codable, Identifiable {

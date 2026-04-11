@@ -6,24 +6,35 @@ struct RecurringExpensesView: View {
     @State private var selectedExpense: RecurringExpense?
     
     var body: some View {
-        NavigationStack {
-            BackgroundView {
-                if recurringExpenseStore.recurringExpenses.isEmpty {
-                    emptyState
-                } else {
-                    recurringList
-                }
+        BackgroundView {
+            if recurringExpenseStore.recurringExpenses.isEmpty {
+                emptyState
+            } else {
+                recurringList
             }
-            .navigationTitle("Recurring Expenses")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button(action: { showAddRecurring = true }) {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.system(size: 18))
-                    }
-                    .foregroundStyle(AppTheme.ocean)
+        }
+        .navigationTitle("Recurring Expenses")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                NavigationLink {
+                    SubscriptionsVaultView()
+                        .environmentObject(recurringExpenseStore)
+                } label: {
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 18))
                 }
+                .foregroundStyle(AppTheme.ocean)
+                .accessibilityLabel("Subscriptions")
+            }
+
+            ToolbarItem(placement: .primaryAction) {
+                Button(action: { showAddRecurring = true }) {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.system(size: 18))
+                }
+                .foregroundStyle(AppTheme.ocean)
+                .accessibilityLabel("Add recurring expense")
             }
         }
         .sheet(isPresented: $showAddRecurring) {
@@ -31,7 +42,13 @@ struct RecurringExpensesView: View {
                 .environmentObject(recurringExpenseStore)
         }
         .sheet(item: $selectedExpense) { expense in
-            EditRecurringExpenseView(isPresented: .constant(true), expense: expense)
+            EditRecurringExpenseView(
+                isPresented: Binding(
+                    get: { selectedExpense != nil },
+                    set: { if !$0 { selectedExpense = nil } }
+                ),
+                expense: expense
+            )
                 .environmentObject(recurringExpenseStore)
         }
     }
@@ -64,6 +81,7 @@ struct RecurringExpensesView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(24)
+        .tabBarPadding()
     }
     
     private var recurringList: some View {
@@ -88,6 +106,7 @@ struct RecurringExpensesView: View {
             }
             .padding(20)
         }
+        .tabBarPadding()
     }
     
     private var summaryCard: some View {

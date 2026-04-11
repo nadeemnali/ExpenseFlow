@@ -4,22 +4,20 @@ struct SubscriptionsVaultView: View {
     @EnvironmentObject private var recurringExpenseStore: RecurringExpenseStore
     
     var body: some View {
-        NavigationStack {
-            BackgroundView {
-                if recurringExpenseStore.subscriptions.isEmpty {
-                    emptyState
-                } else {
-                    subscriptionsContent
-                }
+        BackgroundView {
+            if recurringExpenseStore.subscriptions.isEmpty {
+                emptyState
+            } else {
+                subscriptionsContent
             }
-            .navigationTitle("Subscriptions")
-            .navigationBarTitleDisplayMode(.inline)
         }
+        .navigationTitle("Subscriptions")
+        .navigationBarTitleDisplayMode(.inline)
     }
     
     private var emptyState: some View {
         VStack(spacing: 16) {
-            Image(systemName: "Apps.iphone")
+            Image(systemName: "apps.iphone")
                 .font(.system(size: 48))
                 .foregroundStyle(AppTheme.ink.opacity(0.3))
             
@@ -34,6 +32,7 @@ struct SubscriptionsVaultView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(24)
+        .tabBarPadding()
     }
     
     private var subscriptionsContent: some View {
@@ -44,6 +43,7 @@ struct SubscriptionsVaultView: View {
             }
             .padding(20)
         }
+        .tabBarPadding()
     }
     
     private var summaryCard: some View {

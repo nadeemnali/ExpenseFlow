@@ -120,6 +120,11 @@ final class ExpenseStore: ObservableObject {
         AppLogger.log("Cleared all expenses", category: .storage, level: .info)
     }
 
+    func replaceAll(_ expenses: [Expense]) {
+        self.expenses = expenses.sorted(by: { $0.date > $1.date })
+        AppLogger.log("Replaced expenses from backup", category: .storage, level: .info)
+    }
+
     private func load() {
         let url = fileURL
         

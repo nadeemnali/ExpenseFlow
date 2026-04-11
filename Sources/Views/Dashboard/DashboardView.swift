@@ -4,6 +4,7 @@ import Charts
 struct DashboardView: View {
     @EnvironmentObject private var expenseStore: ExpenseStore
     @EnvironmentObject private var settingsStore: SettingsStore
+    @State private var selectedExpense: Expense?
 
     private var todayTotal: Double {
         expenseStore.dailyTotal(for: Date())
@@ -15,6 +16,10 @@ struct DashboardView: View {
 
     private var remainingBudget: Double {
         max(settingsStore.monthlyBudget - monthTotal, 0)
+    }
+
+    private var shouldShowBudgetAlert: Bool {
+        settingsStore.budgetAlertsEnabled && monthTotal > settingsStore.monthlyBudget
     }
 
     var body: some View {
@@ -30,6 +35,11 @@ struct DashboardView: View {
                 budgetCard
                     .listRowStyle()
 
+                if shouldShowBudgetAlert {
+                    budgetAlertCard
+                        .listRowStyle()
+                }
+
                 monthChart
                     .listRowStyle()
 
@@ -44,8 +54,13 @@ struct DashboardView: View {
                         .listRowStyle()
                 } else {
                     ForEach(recentExpenses) { expense in
-                        expenseRow(expense)
-                            .listRowStyle()
+                        Button {
+                            selectedExpense = expense
+                        } label: {
+                            expenseRow(expense)
+                        }
+                        .buttonStyle(.plain)
+                        .listRowStyle()
                             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                                 Button(role: .destructive) {
                                     expenseStore.deleteExpense(id: expense.id)
@@ -62,7 +77,11 @@ struct DashboardView: View {
         }
         .navigationTitle("Dashboard")
         .navigationBarTitleDisplayMode(.inline)
-
+        .sheet(item: $selectedExpense) { expense in
+            NavigationStack {
+                EditExpenseView(expense: expense)
+            }
+        }
     }
 
     private var header: some View {
@@ -105,6 +124,20 @@ struct DashboardView: View {
         }
     }
 
+    private var budgetAlertCard: some View {
+        GlassCard {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Budget alert")
+                    .font(AppTheme.title(16))
+                    .foregroundStyle(AppTheme.coral)
+
+                Text("You are \(currency(monthTotal - settingsStore.monthlyBudget)) over your monthly budget.")
+                    .font(AppTheme.body(12))
+                    .foregroundStyle(AppTheme.ink.opacity(0.7))
+            }
+        }
+    }
+
     private var monthChart: some View {
         GlassCard {
             VStack(alignment: .leading, spacing: 12) {
@@ -134,11 +167,11 @@ struct DashboardView: View {
         GlassCard {
             HStack(spacing: 12) {
                 Circle()
-                    .fill(expense.category.color.opacity(0.2))
+                    .fill(expense.displayCategoryColor.opacity(0.2))
                     .frame(width: 36, height: 36)
                     .overlay(
-                        Image(systemName: expense.category.systemImage)
-                            .foregroundStyle(expense.category.color)
+                        Image(systemName: expense.displayCategoryIcon)
+                            .foregroundStyle(expense.displayCategoryColor)
                     )
 
                 VStack(alignment: .leading, spacing: 4) {

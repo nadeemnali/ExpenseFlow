@@ -12,10 +12,15 @@ A modern, production-ready iOS expense tracking application built with SwiftUI a
 ✅ **Categorization** - 8+ predefined expense categories (Food, Transport, Health, etc.)
 ✅ **Analytics Dashboard** - View spending trends with monthly and category breakdowns
 ✅ **Budget Management** - Set and monitor monthly budget with configurable alerts
+✅ **Expense Editing** - Tap any entry to edit or delete it
 ✅ **Secure Authentication** - Email-based login with Keychain-stored credentials
 ✅ **Local Storage** - All data stored securely on device (no cloud required)
 ✅ **Offline-First** - Works completely offline with automatic local persistence
 ✅ **Customizable Settings** - Theme (Light/Dark/System), week start, currency, notifications
+✅ **Recurring Expenses** - Track subscriptions and recurring bills
+✅ **Bill Scanning (Premium)** - OCR-powered scan to auto-fill expenses
+✅ **CSV Export + Backups** - Export CSV and full backups to Files/iCloud Drive
+✅ **Custom Categories** - Add your own category labels and colors
 ✅ **Production Ready** - Comprehensive error handling, logging, and data validation
 ✅ **Privacy-Focused** - No tracking, no ads, all data stays on device
 

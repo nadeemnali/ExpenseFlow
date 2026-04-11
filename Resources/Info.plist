@@ -20,5 +20,9 @@
 	<string>1</string>
 	<key>UILaunchStoryboardName</key>
 	<string>Launch Screen</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Allow access to scan receipts and bills.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Allow access to import bill photos for scanning.</string>
 </dict>
 </plist>

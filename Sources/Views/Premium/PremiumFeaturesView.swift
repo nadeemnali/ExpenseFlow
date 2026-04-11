@@ -5,27 +5,25 @@ struct PremiumFeaturesView: View {
     @State private var showBillScanner = false
     
     var body: some View {
-        NavigationView {
-            BackgroundView {
-                ScrollView(showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: 24) {
-                        SectionHeader(title: "Premium Features", subtitle: "Unlock advanced tools")
-                        
-                        if premiumStore.isPremium {
-                            premiumActiveView
-                        } else {
-                            premiumLockedView
-                        }
+        BackgroundView {
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 24) {
+                    SectionHeader(title: "Premium Features", subtitle: "Unlock advanced tools")
+                    
+                    if premiumStore.isPremium {
+                        premiumActiveView
+                    } else {
+                        premiumLockedView
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 24)
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .tabBarPadding()
+                .padding(.horizontal, 20)
+                .padding(.vertical, 24)
             }
-            .navigationTitle("Premium")
-            .navigationBarTitleDisplayMode(.inline)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .tabBarPadding()
         }
+        .navigationTitle("Premium")
+        .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showBillScanner) {
             if premiumStore.isPremium {
                 BillScannerView(premiumStore: premiumStore)

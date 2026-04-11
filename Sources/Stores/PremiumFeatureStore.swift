@@ -1,5 +1,6 @@
 import Foundation
 import StoreKit
+import UserNotifications
 
 @MainActor
 class PremiumFeatureStore: NSObject, ObservableObject {

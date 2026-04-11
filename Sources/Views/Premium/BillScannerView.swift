@@ -3,20 +3,28 @@ import UIKit
 
 struct BillScannerView: View {
     @ObservedObject var premiumStore: PremiumFeatureStore
+    let onComplete: ((OCRResult) -> Void)?
     @State private var showingImagePicker = false
     @State private var selectedImage: UIImage?
     @State private var isProcessing = false
     @State private var ocrResult: OCRResult?
     @State private var error: String?
+    @State private var imageSource: UIImagePickerController.SourceType = .photoLibrary
     @Environment(\.dismiss) var dismiss
+
+    init(premiumStore: PremiumFeatureStore, onComplete: ((OCRResult) -> Void)? = nil) {
+        self.premiumStore = premiumStore
+        self.onComplete = onComplete
+    }
     
     var body: some View {
         NavigationView {
             ZStack {
                 if let result = ocrResult {
-                    OCRResultView(result: result, onSave: {
+                    OCRResultView(result: result) { updated in
+                        onComplete?(updated)
                         dismiss()
-                    })
+                    }
                 } else {
                     VStack(spacing: 24) {
                         ScrollView {
@@ -40,7 +48,10 @@ struct BillScannerView: View {
                         }
                         
                         VStack(spacing: 12) {
-                            Button(action: { showingImagePicker = true }) {
+                            Button(action: {
+                                imageSource = .camera
+                                showingImagePicker = true
+                            }) {
                                 HStack(spacing: 8) {
                                     Image(systemName: "camera.fill")
                                     Text("Take Photo")
@@ -52,7 +63,10 @@ struct BillScannerView: View {
                                 .cornerRadius(8)
                             }
                             
-                            Button(action: { showingImagePicker = true }) {
+                            Button(action: {
+                                imageSource = .photoLibrary
+                                showingImagePicker = true
+                            }) {
                                 HStack(spacing: 8) {
                                     Image(systemName: "photo")
                                     Text("Choose from Library")
@@ -89,7 +103,7 @@ struct BillScannerView: View {
                 }
             }
             .sheet(isPresented: $showingImagePicker) {
-                ImagePickerView(image: $selectedImage)
+                ImagePickerView(image: $selectedImage, sourceType: imageSource)
             }
             .onChange(of: selectedImage) { image in
                 if let image = image {
@@ -129,14 +143,14 @@ struct BillScannerView: View {
 
 struct OCRResultView: View {
     let result: OCRResult
-    let onSave: () -> Void
+    let onSave: (OCRResult) -> Void
     @State private var vendor: String
     @State private var amount: String
     @State private var date: Date
     @State private var description: String
     @Environment(\.dismiss) var dismiss
     
-    init(result: OCRResult, onSave: @escaping () -> Void) {
+    init(result: OCRResult, onSave: @escaping (OCRResult) -> Void) {
         self.result = result
         self.onSave = onSave
         _vendor = State(initialValue: result.vendor)
@@ -220,19 +234,32 @@ struct OCRResultView: View {
     }
     
     private func saveExpense() {
-        onSave()
+        let amountDecimal = Decimal(string: amount.replacingOccurrences(of: ",", with: ".")) ?? result.amount
+        let cleanedDescription = description.trimmingCharacters(in: .whitespacesAndNewlines)
+        let updated = OCRResult(
+            vendor: vendor.trimmingCharacters(in: .whitespacesAndNewlines),
+            amount: amountDecimal,
+            date: date,
+            description: cleanedDescription.isEmpty ? nil : cleanedDescription,
+            rawText: result.rawText,
+            confidence: result.confidence,
+            id: result.id,
+            scannedAt: result.scannedAt
+        )
+        onSave(updated)
         dismiss()
     }
 }
 
 struct ImagePickerView: UIViewControllerRepresentable {
     @Binding var image: UIImage?
+    let sourceType: UIImagePickerController.SourceType
     @Environment(\.dismiss) var dismiss
     
     func makeUIViewController(context: Context) -> UIImagePickerController {
         let picker = UIImagePickerController()
         picker.delegate = context.coordinator
-        picker.sourceType = .photoLibrary
+        picker.sourceType = UIImagePickerController.isSourceTypeAvailable(sourceType) ? sourceType : .photoLibrary
         return picker
     }
     

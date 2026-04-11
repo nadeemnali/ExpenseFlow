@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct SettingsView: View {
     @EnvironmentObject private var authStore: AuthStore
@@ -6,6 +7,16 @@ struct SettingsView: View {
     @EnvironmentObject private var settingsStore: SettingsStore
     @EnvironmentObject private var onboardingStore: OnboardingStore
     @EnvironmentObject private var premiumStore: PremiumFeatureStore
+    @EnvironmentObject private var recurringExpenseStore: RecurringExpenseStore
+    @EnvironmentObject private var customCategoryStore: CustomCategoryStore
+
+    @State private var csvDocument = CSVDocument(text: "")
+    @State private var isExportingCSV = false
+    @State private var backupDocument = BackupDocument(package: BackupPackage(createdAt: Date(), expenses: [], recurringExpenses: [], settings: AppSettings(monthlyBudget: 0, currencyCode: "USD", notificationsEnabled: true, budgetAlertsEnabled: true, startOfWeek: .monday, colorScheme: .system), customCategories: []))
+    @State private var isExportingBackup = false
+    @State private var isImportingBackup = false
+    @State private var importMessage: String = ""
+    @State private var showImportAlert = false
 
     private let currencyOptions = ["USD", "EUR", "GBP", "JPY", "AUD", "CAD", "INR"]
 
@@ -16,7 +27,7 @@ struct SettingsView: View {
                     SectionHeader(title: "Settings", subtitle: "Make ExpenseFlow yours")
 
                     accountCard
-                    premiumCard
+                    quickLinksCard
                     preferencesCard
                     dataCard
                 }
@@ -28,6 +39,29 @@ struct SettingsView: View {
         }
         .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.inline)
+        .fileExporter(
+            isPresented: $isExportingCSV,
+            document: csvDocument,
+            contentType: .commaSeparatedText,
+            defaultFilename: "ExpenseFlow-Expenses"
+        ) { _ in }
+        .fileExporter(
+            isPresented: $isExportingBackup,
+            document: backupDocument,
+            contentType: .json,
+            defaultFilename: "ExpenseFlow-Backup"
+        ) { _ in }
+        .fileImporter(
+            isPresented: $isImportingBackup,
+            allowedContentTypes: [.json]
+        ) { result in
+            handleBackupImport(result)
+        }
+        .alert("Backup", isPresented: $showImportAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(importMessage)
+        }
     }
 
     private var accountCard: some View {
@@ -53,79 +87,29 @@ struct SettingsView: View {
         }
     }
 
-    private var premiumCard: some View {
+    private var quickLinksCard: some View {
         GlassCard {
             VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Premium Features")
-                            .font(AppTheme.title(18))
-                        
-                        if premiumStore.isPremium {
-                            HStack(spacing: 4) {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .font(.system(size: 12))
-                                    .foregroundStyle(.green)
-                                Text("Premium Unlocked")
-                                    .font(AppTheme.body(12))
-                                    .foregroundStyle(.green)
-                            }
-                        } else {
-                            Text("Unlock bill scanning & more")
-                                .font(AppTheme.body(12))
-                                .foregroundStyle(AppTheme.ink.opacity(0.6))
-                        }
-                    }
-                    
-                    Spacer()
-                    
-                    if premiumStore.isPremium {
-                        Image(systemName: "crown.fill")
-                            .font(.system(size: 20))
-                            .foregroundStyle(.yellow)
-                    }
+                Text("Quick Links")
+                    .font(AppTheme.title(18))
+
+                NavigationLink {
+                    PremiumFeaturesView()
+                } label: {
+                    settingsLinkRow(title: "Premium features", subtitle: premiumStore.isPremium ? "Unlocked" : "Bill scanner & more", systemImage: "crown.fill")
                 }
-                
-                if !premiumStore.isPremium {
-                    Button(action: purchasePremium) {
-                        if premiumStore.isLoading {
-                            ProgressView()
-                                .tint(AppTheme.ink)
-                        } else {
-                            Text("Unlock for $0.99")
-                                .font(AppTheme.body(13))
-                                .fontWeight(.semibold)
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 40)
-                    .background(AppTheme.teal.opacity(0.8))
-                    .foregroundStyle(AppTheme.ink)
-                    .cornerRadius(8)
-                    .disabled(premiumStore.isLoading)
-                } else {
-                    Button(action: restorePurchase) {
-                        if premiumStore.isLoading {
-                            ProgressView()
-                                .tint(AppTheme.ink)
-                        } else {
-                            Text("Restore Purchase")
-                                .font(AppTheme.body(13))
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 40)
-                    .background(AppTheme.cloud.opacity(0.8))
-                    .foregroundStyle(AppTheme.ink)
-                    .cornerRadius(8)
-                    .disabled(premiumStore.isLoading)
+
+                NavigationLink {
+                    SubscriptionsVaultView()
+                        .environmentObject(recurringExpenseStore)
+                } label: {
+                    settingsLinkRow(title: "Subscriptions vault", subtitle: "Track recurring subscriptions", systemImage: "sparkles")
                 }
-                
-                if let error = premiumStore.error {
-                    Text(error.errorDescription ?? "Unknown error")
-                        .font(AppTheme.body(11))
-                        .foregroundStyle(AppTheme.coral)
-                        .lineLimit(2)
+
+                NavigationLink {
+                    CategoryManagerView()
+                } label: {
+                    settingsLinkRow(title: "Custom categories", subtitle: "Add your own labels", systemImage: "tag.fill")
                 }
             }
         }
@@ -166,9 +150,9 @@ struct SettingsView: View {
                             Text(settingsStore.currencyCode)
                                 .font(AppTheme.body(14))
                                 .foregroundStyle(AppTheme.ink)
-                            
+
                             Spacer()
-                            
+
                             Image(systemName: "chevron.down")
                                 .font(.system(size: 12, weight: .semibold))
                                 .foregroundStyle(AppTheme.ink.opacity(0.6))
@@ -210,6 +194,12 @@ struct SettingsView: View {
                         .font(AppTheme.body(14))
                 }
                 .tint(AppTheme.ocean)
+
+                Toggle(isOn: $settingsStore.budgetAlertsEnabled) {
+                    Text("Budget alerts")
+                        .font(AppTheme.body(14))
+                }
+                .tint(AppTheme.ocean)
             }
         }
     }
@@ -217,24 +207,44 @@ struct SettingsView: View {
     private var dataCard: some View {
         GlassCard {
             VStack(alignment: .leading, spacing: 12) {
-                Text("Data")
+                Text("Data & Backup")
                     .font(AppTheme.title(18))
 
-                Text("Export, manage, or reset your data")
+                Text("Export, import, or reset your data")
                     .font(AppTheme.body(13))
                     .foregroundStyle(AppTheme.ink.opacity(0.6))
 
                 VStack(spacing: 8) {
-                    Button(action: { exportDataAsCSV() }) {
+                    Button(action: exportCSV) {
                         HStack {
                             Image(systemName: "arrow.up.doc")
-                            Text("Export as CSV")
+                            Text("Export CSV")
                         }
                         .font(AppTheme.body(13))
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .foregroundStyle(AppTheme.ocean)
                     }
-                    
+
+                    Button(action: exportBackup) {
+                        HStack {
+                            Image(systemName: "externaldrive.badge.icloud")
+                            Text("Export Backup")
+                        }
+                        .font(AppTheme.body(13))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .foregroundStyle(AppTheme.ocean)
+                    }
+
+                    Button(action: { isImportingBackup = true }) {
+                        HStack {
+                            Image(systemName: "square.and.arrow.down")
+                            Text("Import Backup")
+                        }
+                        .font(AppTheme.body(13))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .foregroundStyle(AppTheme.ocean)
+                    }
+
                     Button("Load sample") {
                         expenseStore.resetToSample()
                     }
@@ -258,73 +268,66 @@ struct SettingsView: View {
             }
         }
     }
-    
-    private func exportDataAsCSV() {
-        let csvData = generateCSV()
-        let filename = "ExpenseFlow_\(Date().formatted(date: .abbreviated, time: .omitted)).csv"
-        
-        guard let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
-            return
-        }
-        
-        let fileURL = url.appendingPathComponent(filename)
-        
-        do {
-            try csvData.write(to: fileURL, atomically: true, encoding: .utf8)
-            
-            var urlsToShare = [fileURL]
-            
-            DispatchQueue.main.async {
-                let activityViewController = UIActivityViewController(activityItems: urlsToShare, applicationActivities: nil)
-                
-                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                   let window = windowScene.windows.first,
-                   let rootViewController = window.rootViewController {
-                    rootViewController.present(activityViewController, animated: true)
-                }
+
+    private func settingsLinkRow(title: String, subtitle: String, systemImage: String) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: systemImage)
+                .font(.system(size: 16))
+                .foregroundStyle(AppTheme.ocean)
+                .frame(width: 24)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(AppTheme.body(14))
+                    .foregroundStyle(AppTheme.ink)
+                Text(subtitle)
+                    .font(AppTheme.body(12))
+                    .foregroundStyle(AppTheme.ink.opacity(0.6))
             }
-        } catch {
-            AppLogger.error("Failed to create CSV export", error: error, category: .storage)
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(AppTheme.ink.opacity(0.4))
         }
     }
-    
-    private func generateCSV() -> String {
-        var csv = "Date,Title,Category,Amount,Notes\n"
-        
-        let sortedExpenses = expenseStore.expenses.sorted { $0.date > $1.date }
-        
-        for expense in sortedExpenses {
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "yyyy-MM-dd"
-            let dateString = dateFormatter.string(from: expense.date)
-            
-            let escapedTitle = csvEscapeField(expense.title)
-            let escapedCategory = expense.category.label
-            let escapedNotes = csvEscapeField(expense.notes)
-            
-            let line = "\(dateString),\(escapedTitle),\(escapedCategory),\(expense.amount),\(escapedNotes)\n"
-            csv.append(line)
-        }
-        
-        return csv
+
+    private func exportCSV() {
+        let csvString = CSVExporter.makeCSV(expenses: expenseStore.expenses)
+        csvDocument = CSVDocument(text: csvString)
+        isExportingCSV = true
     }
-    
-    private func csvEscapeField(_ field: String) -> String {
-        if field.contains(",") || field.contains("\"") || field.contains("\n") {
-            return "\"\(field.replacingOccurrences(of: "\"", with: "\"\""))\""
-        }
-        return field
+
+    private func exportBackup() {
+        let package = BackupPackage(
+            createdAt: Date(),
+            expenses: expenseStore.expenses,
+            recurringExpenses: recurringExpenseStore.recurringExpenses,
+            settings: settingsStore.snapshot,
+            customCategories: customCategoryStore.categories
+        )
+        backupDocument = BackupDocument(package: package)
+        isExportingBackup = true
     }
-    
-    private func purchasePremium() {
-        Task {
-            await premiumStore.purchase()
+
+    private func handleBackupImport(_ result: Result<URL, Error>) {
+        switch result {
+        case .success(let url):
+            do {
+                let data = try Data(contentsOf: url)
+                let decoded = try JSONDecoder().decode(BackupPackage.self, from: data)
+                expenseStore.replaceAll(decoded.expenses)
+                recurringExpenseStore.replaceAll(decoded.recurringExpenses)
+                settingsStore.apply(decoded.settings)
+                customCategoryStore.replaceAll(decoded.customCategories)
+                importMessage = "Backup imported successfully."
+            } catch {
+                importMessage = "Failed to import backup: \(error.localizedDescription)"
+            }
+        case .failure(let error):
+            importMessage = "Failed to import backup: \(error.localizedDescription)"
         }
-    }
-    
-    private func restorePurchase() {
-        Task {
-            await premiumStore.restorePurchases()
-        }
+        showImportAlert = true
     }
 }

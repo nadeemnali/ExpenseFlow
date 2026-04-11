@@ -25,10 +25,10 @@ struct MainTabView: View {
             }
             
             NavigationStack {
-                PremiumFeaturesView()
+                RecurringExpensesView()
             }
             .tabItem {
-                Label("Premium", systemImage: "crown.fill")
+                Label("Recurring", systemImage: "repeat")
             }
 
             NavigationStack {
