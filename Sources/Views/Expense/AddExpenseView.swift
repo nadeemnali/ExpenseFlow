@@ -132,7 +132,7 @@ struct AddExpenseView: View {
             } else {
                 PremiumLockedView(
                     premiumStore: premiumStore,
-                    action: { showBillScanner = false },
+                    action: {},
                     featureName: "Bill Scanner"
                 )
             }

@@ -12,8 +12,10 @@ struct SettingsView: View {
 
     @State private var csvDocument = CSVDocument(text: "")
     @State private var isExportingCSV = false
+    @State private var csvExportFilename = "ExpenseFlow-Expenses"
     @State private var backupDocument = BackupDocument(package: BackupPackage(createdAt: Date(), expenses: [], recurringExpenses: [], settings: AppSettings(monthlyBudget: 0, currencyCode: "USD", notificationsEnabled: true, budgetAlertsEnabled: true, startOfWeek: .monday, colorScheme: .system), customCategories: []))
     @State private var isExportingBackup = false
+    @State private var backupExportFilename = "ExpenseFlow-Backup"
     @State private var isImportingBackup = false
     @State private var importMessage: String = ""
     @State private var showImportAlert = false
@@ -43,13 +45,13 @@ struct SettingsView: View {
             isPresented: $isExportingCSV,
             document: csvDocument,
             contentType: .commaSeparatedText,
-            defaultFilename: "ExpenseFlow-Expenses"
+            defaultFilename: csvExportFilename
         ) { _ in }
         .fileExporter(
             isPresented: $isExportingBackup,
             document: backupDocument,
             contentType: .json,
-            defaultFilename: "ExpenseFlow-Backup"
+            defaultFilename: backupExportFilename
         ) { _ in }
         .fileImporter(
             isPresented: $isImportingBackup,
@@ -296,6 +298,7 @@ struct SettingsView: View {
     private func exportCSV() {
         let csvString = CSVExporter.makeCSV(expenses: expenseStore.expenses)
         csvDocument = CSVDocument(text: csvString)
+        csvExportFilename = exportFilename(prefix: "ExpenseFlow-Expenses")
         isExportingCSV = true
     }
 
@@ -308,6 +311,7 @@ struct SettingsView: View {
             customCategories: customCategoryStore.categories
         )
         backupDocument = BackupDocument(package: package)
+        backupExportFilename = exportFilename(prefix: "ExpenseFlow-Backup")
         isExportingBackup = true
     }
 
@@ -315,6 +319,13 @@ struct SettingsView: View {
         switch result {
         case .success(let url):
             do {
+                let hasAccess = url.startAccessingSecurityScopedResource()
+                defer {
+                    if hasAccess {
+                        url.stopAccessingSecurityScopedResource()
+                    }
+                }
+
                 let data = try Data(contentsOf: url)
                 let decoded = try JSONDecoder().decode(BackupPackage.self, from: data)
                 expenseStore.replaceAll(decoded.expenses)
@@ -329,5 +340,12 @@ struct SettingsView: View {
             importMessage = "Failed to import backup: \(error.localizedDescription)"
         }
         showImportAlert = true
+    }
+
+    private func exportFilename(prefix: String) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd-HHmm"
+        return "\(prefix)-\(formatter.string(from: Date()))"
     }
 }

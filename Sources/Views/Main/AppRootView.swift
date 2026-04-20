@@ -2,6 +2,10 @@ import SwiftUI
 
 struct AppRootView: View {
     @EnvironmentObject private var onboardingStore: OnboardingStore
+    @EnvironmentObject private var expenseStore: ExpenseStore
+    @EnvironmentObject private var recurringExpenseStore: RecurringExpenseStore
+    @EnvironmentObject private var settingsStore: SettingsStore
+    @Environment(\.scenePhase) private var scenePhase
     @State private var showSplash = true
 
     var body: some View {
@@ -25,6 +29,30 @@ struct AppRootView: View {
                     showSplash = false
                 }
             }
+
+            synchronizeRecurringFeatures()
         }
+        .onChange(of: recurringExpenseStore.recurringExpenses) { _ in
+            synchronizeRecurringFeatures()
+        }
+        .onChange(of: settingsStore.notificationsEnabled) { _ in
+            synchronizeReminderSchedule()
+        }
+        .onChange(of: scenePhase) { newPhase in
+            guard newPhase == .active else { return }
+            synchronizeRecurringFeatures()
+        }
+    }
+
+    private func synchronizeRecurringFeatures() {
+        expenseStore.autoGenerateRecurringExpenses(from: recurringExpenseStore)
+        synchronizeReminderSchedule()
+    }
+
+    private func synchronizeReminderSchedule() {
+        BillReminderService.shared.syncReminders(
+            isEnabled: settingsStore.notificationsEnabled,
+            from: recurringExpenseStore
+        )
     }
 }

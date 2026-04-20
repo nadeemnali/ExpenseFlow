@@ -48,6 +48,8 @@ struct SignupView: View {
                 }
                 .buttonStyle(PrimaryButtonStyle())
 
+                SocialAuthSection(appleButtonType: .continue)
+
                 HStack {
                     Text("Already have an account?")
                         .font(AppTheme.body(12))
@@ -61,4 +63,3 @@ struct SignupView: View {
         }
     }
 }
-

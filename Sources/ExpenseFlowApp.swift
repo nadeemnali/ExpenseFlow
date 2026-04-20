@@ -1,6 +1,4 @@
 import SwiftUI
-import UserNotifications
-import StoreKit
 
 @main
 struct ExpenseFlowApp: App {
@@ -23,24 +21,6 @@ struct ExpenseFlowApp: App {
                 .environmentObject(premiumStore)
                 .environmentObject(customCategoryStore)
                 .preferredColorScheme(settingsStore.preferredColorScheme)
-                .onAppear {
-                    setupNotifications()
-                    autoGenerateRecurringExpenses()
-                }
         }
-    }
-    
-    private func setupNotifications() {
-        BillReminderService.shared.requestNotificationPermission { granted in
-            if granted {
-                AppLogger.log("Notification permission granted", category: .general, level: .debug)
-                BillReminderService.shared.scheduleAllReminders(from: recurringExpenseStore)
-            }
-        }
-    }
-    
-    private func autoGenerateRecurringExpenses() {
-        expenseStore.autoGenerateRecurringExpenses(from: recurringExpenseStore)
     }
 }
-

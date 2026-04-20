@@ -44,6 +44,40 @@ final class BillReminderService {
             scheduleReminders(for: expense)
         }
     }
+
+    func syncReminders(isEnabled: Bool, from recurringExpenseStore: RecurringExpenseStore) {
+        guard isEnabled else {
+            removeAllPendingReminders()
+            return
+        }
+
+        UNUserNotificationCenter.current().getNotificationSettings { [weak self] settings in
+            guard let self else { return }
+
+            switch settings.authorizationStatus {
+            case .authorized, .provisional, .ephemeral:
+                self.scheduleAllRemindersOnMain(from: recurringExpenseStore)
+            case .notDetermined:
+                self.requestNotificationPermission { granted in
+                    if granted {
+                        self.scheduleAllRemindersOnMain(from: recurringExpenseStore)
+                    } else {
+                        self.removeAllPendingReminders()
+                    }
+                }
+            case .denied:
+                self.removeAllPendingReminders()
+            @unknown default:
+                self.removeAllPendingReminders()
+            }
+        }
+    }
+
+    private func scheduleAllRemindersOnMain(from recurringExpenseStore: RecurringExpenseStore) {
+        DispatchQueue.main.async {
+            self.scheduleAllReminders(from: recurringExpenseStore)
+        }
+    }
     
     private func scheduleNotification(for expense: RecurringExpense, at date: Date) {
         let content = UNMutableNotificationContent()

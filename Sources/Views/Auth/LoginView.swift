@@ -41,6 +41,8 @@ struct LoginView: View {
                 }
                 .buttonStyle(PrimaryButtonStyle())
 
+                SocialAuthSection(appleButtonType: .signIn)
+
                 HStack {
                     Text("No account yet?")
                         .font(AppTheme.body(12))

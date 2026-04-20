@@ -9,7 +9,10 @@ struct AddRecurringExpenseView: View {
     @State private var selectedCategory: ExpenseCategory = .food
     @State private var selectedFrequency: RecurrenceFrequency = .monthly
     @State private var startDate: Date = Date()
+    @State private var hasEndDate: Bool = false
+    @State private var endDate: Date = Date()
     @State private var notificationEnabled: Bool = true
+    @State private var notificationDaysBefore: Int = 1
     @State private var notes: String = ""
     @State private var errorMessage: String?
     
@@ -58,23 +61,43 @@ struct AddRecurringExpenseView: View {
                                 DatePicker("Start Date", selection: $startDate, displayedComponents: .date)
                                     .datePickerStyle(.graphical)
                                     .frame(maxWidth: .infinity, alignment: .leading)
+
+                                Toggle(isOn: $hasEndDate) {
+                                    Text("Set end date")
+                                        .font(AppTheme.body(14))
+                                }
+                                .tint(AppTheme.ocean)
+
+                                if hasEndDate {
+                                    FormFieldLabel(text: "End Date")
+                                    DatePicker("End Date", selection: $endDate, in: startDate..., displayedComponents: .date)
+                                        .datePickerStyle(.compact)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                }
                                 
                                 Toggle(isOn: $notificationEnabled) {
                                     Text("Enable reminders")
                                         .font(AppTheme.body(14))
                                 }
                                 .tint(AppTheme.ocean)
-                                
-                                if !notes.isEmpty {
-                                    FormFieldLabel(text: "Notes")
-                                    TextEditor(text: $notes)
-                                        .frame(height: 80)
-                                        .scrollContentBackground(.hidden)
-                                        .padding(12)
-                                        .background(AppTheme.cloud.opacity(0.9))
-                                        .foregroundStyle(AppTheme.ink)
-                                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+
+                                if notificationEnabled {
+                                    Stepper(value: $notificationDaysBefore, in: 1...7) {
+                                        Text("Remind \(notificationDaysBefore) day\(notificationDaysBefore == 1 ? "" : "s") before")
+                                            .font(AppTheme.body(14))
+                                            .foregroundStyle(AppTheme.ink)
+                                    }
+                                    .tint(AppTheme.ocean)
                                 }
+
+                                FormFieldLabel(text: "Notes")
+                                TextEditor(text: $notes)
+                                    .frame(height: 80)
+                                    .scrollContentBackground(.hidden)
+                                    .padding(12)
+                                    .background(AppTheme.cloud.opacity(0.9))
+                                    .foregroundStyle(AppTheme.ink)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                             }
                         }
                         
@@ -106,9 +129,21 @@ struct AddRecurringExpenseView: View {
                 }
             }
         }
+        .onChange(of: hasEndDate) { enabled in
+            if enabled && endDate < startDate {
+                endDate = startDate
+            }
+        }
+        .onChange(of: startDate) { newValue in
+            if hasEndDate && endDate < newValue {
+                endDate = newValue
+            }
+        }
     }
     
     private func saveRecurringExpense() {
+        errorMessage = nil
+
         guard !title.trimmingCharacters(in: .whitespaces).isEmpty else {
             errorMessage = "Title is required"
             return
@@ -118,6 +153,11 @@ struct AddRecurringExpenseView: View {
             errorMessage = "Amount must be greater than 0"
             return
         }
+
+        if hasEndDate && endDate < startDate {
+            errorMessage = "End date must be on or after the start date"
+            return
+        }
         
         let recurring = RecurringExpense(
             title: title.trimmingCharacters(in: .whitespaces),
@@ -125,8 +165,10 @@ struct AddRecurringExpenseView: View {
             category: selectedCategory,
             frequency: selectedFrequency,
             startDate: startDate,
+            endDate: hasEndDate ? endDate : nil,
             isActive: true,
             notificationEnabled: notificationEnabled,
+            notificationDaysBefore: notificationDaysBefore,
             notes: notes.trimmingCharacters(in: .whitespaces)
         )
         
@@ -145,7 +187,10 @@ struct EditRecurringExpenseView: View {
     @State private var selectedCategory: ExpenseCategory = .food
     @State private var selectedFrequency: RecurrenceFrequency = .monthly
     @State private var startDate: Date = Date()
+    @State private var hasEndDate: Bool = false
+    @State private var endDate: Date = Date()
     @State private var notificationEnabled: Bool = true
+    @State private var notificationDaysBefore: Int = 1
     @State private var notes: String = ""
     @State private var errorMessage: String?
     
@@ -194,23 +239,43 @@ struct EditRecurringExpenseView: View {
                                 DatePicker("Start Date", selection: $startDate, displayedComponents: .date)
                                     .datePickerStyle(.graphical)
                                     .frame(maxWidth: .infinity, alignment: .leading)
+
+                                Toggle(isOn: $hasEndDate) {
+                                    Text("Set end date")
+                                        .font(AppTheme.body(14))
+                                }
+                                .tint(AppTheme.ocean)
+
+                                if hasEndDate {
+                                    FormFieldLabel(text: "End Date")
+                                    DatePicker("End Date", selection: $endDate, in: startDate..., displayedComponents: .date)
+                                        .datePickerStyle(.compact)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                }
                                 
                                 Toggle(isOn: $notificationEnabled) {
                                     Text("Enable reminders")
                                         .font(AppTheme.body(14))
                                 }
                                 .tint(AppTheme.ocean)
-                                
-                                if !notes.isEmpty {
-                                    FormFieldLabel(text: "Notes")
-                                    TextEditor(text: $notes)
-                                        .frame(height: 80)
-                                        .scrollContentBackground(.hidden)
-                                        .padding(12)
-                                        .background(AppTheme.cloud.opacity(0.9))
-                                        .foregroundStyle(AppTheme.ink)
-                                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+
+                                if notificationEnabled {
+                                    Stepper(value: $notificationDaysBefore, in: 1...7) {
+                                        Text("Remind \(notificationDaysBefore) day\(notificationDaysBefore == 1 ? "" : "s") before")
+                                            .font(AppTheme.body(14))
+                                            .foregroundStyle(AppTheme.ink)
+                                    }
+                                    .tint(AppTheme.ocean)
                                 }
+
+                                FormFieldLabel(text: "Notes")
+                                TextEditor(text: $notes)
+                                    .frame(height: 80)
+                                    .scrollContentBackground(.hidden)
+                                    .padding(12)
+                                    .background(AppTheme.cloud.opacity(0.9))
+                                    .foregroundStyle(AppTheme.ink)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                             }
                         }
                         
@@ -248,12 +313,27 @@ struct EditRecurringExpenseView: View {
             selectedCategory = expense.category
             selectedFrequency = expense.frequency
             startDate = expense.startDate
+            hasEndDate = expense.endDate != nil
+            endDate = expense.endDate ?? expense.startDate
             notificationEnabled = expense.notificationEnabled
+            notificationDaysBefore = expense.notificationDaysBefore
             notes = expense.notes
+        }
+        .onChange(of: hasEndDate) { enabled in
+            if enabled && endDate < startDate {
+                endDate = startDate
+            }
+        }
+        .onChange(of: startDate) { newValue in
+            if hasEndDate && endDate < newValue {
+                endDate = newValue
+            }
         }
     }
     
     private func updateRecurringExpense() {
+        errorMessage = nil
+
         guard !title.trimmingCharacters(in: .whitespaces).isEmpty else {
             errorMessage = "Title is required"
             return
@@ -263,6 +343,11 @@ struct EditRecurringExpenseView: View {
             errorMessage = "Amount must be greater than 0"
             return
         }
+
+        if hasEndDate && endDate < startDate {
+            errorMessage = "End date must be on or after the start date"
+            return
+        }
         
         var updated = expense
         updated.title = title.trimmingCharacters(in: .whitespaces)
@@ -270,7 +355,9 @@ struct EditRecurringExpenseView: View {
         updated.category = selectedCategory
         updated.frequency = selectedFrequency
         updated.startDate = startDate
+        updated.endDate = hasEndDate ? endDate : nil
         updated.notificationEnabled = notificationEnabled
+        updated.notificationDaysBefore = notificationDaysBefore
         updated.notes = notes.trimmingCharacters(in: .whitespaces)
         
         recurringExpenseStore.update(updated)
