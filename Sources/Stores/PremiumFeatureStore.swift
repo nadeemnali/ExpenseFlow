@@ -17,10 +17,12 @@ class PremiumFeatureStore: NSObject, ObservableObject {
     
     override init() {
         super.init()
-        
-        self.isPremium = UserDefaults.standard.bool(forKey: Self.premiumPurchasedKey)
-        
+
         self.updateListenerTask = listenForTransactions()
+
+        Task {
+            await refreshPremiumStatus()
+        }
     }
     
     deinit {
@@ -41,9 +43,12 @@ class PremiumFeatureStore: NSObject, ObservableObject {
             switch result {
             case .success(let verification):
                 switch verification {
-                case .verified:
-                    UserDefaults.standard.set(true, forKey: Self.premiumPurchasedKey)
-                    self.isPremium = true
+                case .verified(let transaction):
+                    guard transaction.productID == Self.productID else {
+                        throw PremiumError.verificationFailed
+                    }
+                    await transaction.finish()
+                    setPremiumStatus(true)
                 case .unverified:
                     throw PremiumError.verificationFailed
                 @unknown default:
@@ -73,21 +78,7 @@ class PremiumFeatureStore: NSObject, ObservableObject {
         
         do {
             try await AppStore.sync()
-            
-            var hasPurchase = false
-            for await result in Transaction.all {
-                switch result {
-                case .verified:
-                    hasPurchase = true
-                case .unverified:
-                    continue
-                @unknown default:
-                    break
-                }
-            }
-            
-            self.isPremium = hasPurchase
-            UserDefaults.standard.set(hasPurchase, forKey: Self.premiumPurchasedKey)
+            await refreshPremiumStatus()
         } catch {
             if let storeError = error as? StoreKitError {
                 self.error = .storeKitError(storeError)
@@ -114,10 +105,12 @@ class PremiumFeatureStore: NSObject, ObservableObject {
         Task(priority: .background) {
             for await result in Transaction.updates {
                 switch result {
-                case .verified:
-                    UserDefaults.standard.set(true, forKey: Self.premiumPurchasedKey)
-                    await MainActor.run {
-                        self.isPremium = true
+                case .verified(let transaction):
+                    if transaction.productID == Self.productID {
+                        await transaction.finish()
+                        await MainActor.run {
+                            self.setPremiumStatus(transaction.revocationDate == nil)
+                        }
                     }
                 case .unverified:
                     break
@@ -126,6 +119,26 @@ class PremiumFeatureStore: NSObject, ObservableObject {
                 }
             }
         }
+    }
+
+    private func refreshPremiumStatus() async {
+        var hasActivePremium = false
+
+        for await result in Transaction.currentEntitlements {
+            guard case .verified(let transaction) = result else { continue }
+            guard transaction.productID == Self.productID else { continue }
+            guard transaction.revocationDate == nil else { continue }
+
+            hasActivePremium = true
+            break
+        }
+
+        setPremiumStatus(hasActivePremium)
+    }
+
+    private func setPremiumStatus(_ isPremium: Bool) {
+        self.isPremium = isPremium
+        UserDefaults.standard.set(isPremium, forKey: Self.premiumPurchasedKey)
     }
 }
 

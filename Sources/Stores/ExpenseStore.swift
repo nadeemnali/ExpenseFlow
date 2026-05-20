@@ -21,26 +21,34 @@ final class ExpenseStore: ObservableObject {
     }
     
     func autoGenerateRecurringExpenses(from recurringExpenseStore: RecurringExpenseStore) {
-        let today = Date()
+        let today = Calendar.current.startOfDay(for: Date())
         let calendar = Calendar.current
-        let lastGenerate = UserDefaults.standard.object(forKey: lastAutoGenerateKey) as? Date
+        let lastGenerate = (UserDefaults.standard.object(forKey: lastAutoGenerateKey) as? Date)
+            .map { calendar.startOfDay(for: $0) }
         
         // Generate once per day maximum
         if let lastGenerate = lastGenerate,
            calendar.isDateInToday(lastGenerate) {
             return
         }
-        
+
+        let generationStart = lastGenerate
+            .flatMap { calendar.date(byAdding: .day, value: 1, to: $0) }
+            ?? today
+
         for recurring in recurringExpenseStore.activeRecurringExpenses {
-            if recurring.shouldGenerate(for: today) {
+            for dueDate in recurring.dueDates(from: generationStart, through: today) {
                 let expense = Expense(
                     title: recurring.title,
                     amount: recurring.amount,
                     category: recurring.category,
-                    date: today,
+                    date: dueDate,
                     notes: "From: \(recurring.frequency.label) recurring expense"
                 )
-                addExpense(expense)
+
+                if !hasMatchingGeneratedExpense(for: expense) {
+                    addExpense(expense)
+                }
             }
         }
         
@@ -164,6 +172,18 @@ final class ExpenseStore: ObservableObject {
     private var fileURL: URL {
         let directory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
         return (directory ?? URL(fileURLWithPath: NSTemporaryDirectory())).appendingPathComponent(fileName)
+    }
+
+    private func hasMatchingGeneratedExpense(for expense: Expense) -> Bool {
+        let calendar = Calendar.current
+
+        return expenses.contains { existing in
+            existing.title == expense.title &&
+            existing.amount == expense.amount &&
+            existing.category == expense.category &&
+            existing.notes == expense.notes &&
+            calendar.isDate(existing.date, inSameDayAs: expense.date)
+        }
     }
 
     static let sample: [Expense] = [

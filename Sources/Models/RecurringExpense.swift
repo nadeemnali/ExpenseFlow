@@ -130,4 +130,34 @@ struct RecurringExpense: Identifiable, Codable, Hashable {
         
         return calendar.isDate(startDate, inSameDayAs: date)
     }
+
+    func dueDates(from start: Date, through end: Date) -> [Date] {
+        guard isActive else { return [] }
+
+        let calendar = Calendar.current
+        let startDay = calendar.startOfDay(for: start)
+        let endDay = calendar.startOfDay(for: end)
+        guard startDay <= endDay else { return [] }
+
+        let effectiveEndDay: Date
+        if let endDate {
+            effectiveEndDay = min(calendar.startOfDay(for: endDate), endDay)
+        } else {
+            effectiveEndDay = endDay
+        }
+
+        guard startDay <= effectiveEndDay else { return [] }
+
+        var dates: [Date] = []
+        var currentDate = calendar.startOfDay(for: startDate)
+
+        while currentDate <= effectiveEndDay {
+            if currentDate >= startDay {
+                dates.append(currentDate)
+            }
+            currentDate = calendar.startOfDay(for: frequency.nextDate(after: currentDate))
+        }
+
+        return dates
+    }
 }
