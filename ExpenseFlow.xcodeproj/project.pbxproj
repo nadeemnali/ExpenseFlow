@@ -58,6 +58,7 @@
 		882F9EF4981690A2B1CB6A2A /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFA16E4660296BB59AD32D6F /* MainTabView.swift */; };
 		89521DDEA58E8E01695C6EAC /* ExpenseStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0475033586BFE8DBA63BAD2A /* ExpenseStoreTests.swift */; };
 		918A1F555D8EC658AD343526 /* DateHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4E35CD4D359EFEECE1FA72F /* DateHelpers.swift */; };
+		9454D814791C1C7EEC9937D2 /* ImageStorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB88ED23393F9EFE095973DA /* ImageStorageManager.swift */; };
 		9869D79A1269A043B93C1D8D /* AuthStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A25F87FED82892132FA192D /* AuthStore.swift */; };
 		A4BD7F6E8C0177796A335D83 /* RecurringExpensesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 810743E6A2C9833965145AED /* RecurringExpensesView.swift */; };
 		A986D5A7BC11279AF32BED9C /* Expense+Display.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11E08513575BBAFC9B4119B /* Expense+Display.swift */; };
@@ -69,6 +70,7 @@
 		C8E8DF3BE7294EFFC16C1ADE /* RecurringExpenseStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F1DE1EA17BF70E6DB40F6C2 /* RecurringExpenseStore.swift */; };
 		CDD9EA116937C27B0818F255 /* TabBarPaddingModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7ED1179CD6A05C0B43D28B45 /* TabBarPaddingModifier.swift */; };
 		D345E92AD86B4218E4F170C5 /* AddExpenseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C7DA97B8EFE649BF259ACD0 /* AddExpenseView.swift */; };
+		DD8DBE2B11C2082052D0A344 /* BudgetAlertService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3FF924B95D7423EAC677A96 /* BudgetAlertService.swift */; };
 		DF979A17D374F732FDE21205 /* SocialAuthSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1092A49E66974D5DE180743D /* SocialAuthSection.swift */; };
 		E082C121EC538014ED8F8A7D /* BackupDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FA0A0F43DA5EBA517F46A73 /* BackupDocument.swift */; };
 		F0E9A50582D0B6197FBE93EC /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C82FAF51619AC02FC762771 /* DashboardView.swift */; };
@@ -138,6 +140,7 @@
 		AE4AB67A1777E47861FF8DBE /* CustomCategoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomCategoryStore.swift; sourceTree = "<group>"; };
 		AFA16E4660296BB59AD32D6F /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		B1E01C50B00E4BB77AE29CFC /* CSVExportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSVExportTests.swift; sourceTree = "<group>"; };
+		B3FF924B95D7423EAC677A96 /* BudgetAlertService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetAlertService.swift; sourceTree = "<group>"; };
 		BE6C6ECA2A2524ACB2EFFBAE /* RecurringExpense.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringExpense.swift; sourceTree = "<group>"; };
 		C0D0F0994CBC543108F99F82 /* AuthRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthRootView.swift; sourceTree = "<group>"; };
 		C7EAB6FBB3D27112E20932BB /* ExpenseFlowApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseFlowApp.swift; sourceTree = "<group>"; };
@@ -147,6 +150,7 @@
 		E11E08513575BBAFC9B4119B /* Expense+Display.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Expense+Display.swift"; sourceTree = "<group>"; };
 		E4E35CD4D359EFEECE1FA72F /* DateHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateHelpers.swift; sourceTree = "<group>"; };
 		EA769BF6D70FAB180C4C1E99 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		EB88ED23393F9EFE095973DA /* ImageStorageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageStorageManager.swift; sourceTree = "<group>"; };
 		EDC8A2B5AB1366ADF4378C34 /* Expense.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Expense.swift; sourceTree = "<group>"; };
 		F2AC14CAC023A16E9E7295CF /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		F365AC5B83D079AE1029FCE7 /* AppRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRootView.swift; sourceTree = "<group>"; };
@@ -354,10 +358,12 @@
 			children = (
 				7FA0A0F43DA5EBA517F46A73 /* BackupDocument.swift */,
 				A3F8D6A1F06A0BCE941AAE8B /* BillReminderService.swift */,
+				B3FF924B95D7423EAC677A96 /* BudgetAlertService.swift */,
 				771AB80DA1E5D1BCDB709053 /* CSVDocument.swift */,
 				DDB8593F691B71851B3D3823 /* CSVExporter.swift */,
 				E4E35CD4D359EFEECE1FA72F /* DateHelpers.swift */,
 				6E688C41A557007E4BC98BAA /* Formatters.swift */,
+				EB88ED23393F9EFE095973DA /* ImageStorageManager.swift */,
 				3A109C974264A5DD63A213D7 /* KeychainHelper.swift */,
 				904BFBA405AF5B5D9C264F0E /* Logger.swift */,
 			);
@@ -494,6 +500,7 @@
 				6AB6AA0A9A24309F0D5FF00E /* BillOCRService.swift in Sources */,
 				3FF50B798480D4711F9079B9 /* BillReminderService.swift in Sources */,
 				56A334A5C6DF254C0B41E877 /* BillScannerView.swift in Sources */,
+				DD8DBE2B11C2082052D0A344 /* BudgetAlertService.swift in Sources */,
 				4DB6A3D940CE67E48A8FCB38 /* CSVDocument.swift in Sources */,
 				4C8597DFDF48FA93D43FD60F /* CSVExporter.swift in Sources */,
 				3D91465B64036C6CB5BCE851 /* CategoryManagerView.swift in Sources */,
@@ -510,6 +517,7 @@
 				601E02E0070A7944FBF8FEA5 /* Formatters.swift in Sources */,
 				52D149F6183C656D172265A8 /* GlassCard.swift in Sources */,
 				810250635F64AE01C8790111 /* HistoryView.swift in Sources */,
+				9454D814791C1C7EEC9937D2 /* ImageStorageManager.swift in Sources */,
 				37A1B890EDD383CB19FA5E94 /* KeychainHelper.swift in Sources */,
 				023C6D25718E276DE35F5B06 /* ListRowStyleModifier.swift in Sources */,
 				5574AE0998BE31A4DA23AD51 /* Logger.swift in Sources */,

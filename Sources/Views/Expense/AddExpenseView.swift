@@ -161,6 +161,16 @@ struct AddExpenseView: View {
             notes: notes
         )
         expenseStore.addExpense(expense)
+        
+        // Trigger budget alert notification if enabled
+        if settingsStore.budgetAlertsEnabled {
+            let currentMonthlySpending = expenseStore.monthlyTotal(for: expense.date)
+            BudgetAlertService.shared.checkAndScheduleBudgetAlert(
+                currentMonthlySpending: currentMonthlySpending,
+                monthlyBudget: settingsStore.monthlyBudget,
+                currencyCode: settingsStore.currencyCode
+            )
+        }
 
         savedMessage = saveMessage(for: expense)
         showSavedAlert = true

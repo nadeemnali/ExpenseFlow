@@ -177,11 +177,11 @@ xcodebuild test -scheme ExpenseFlow
 
 ## Known Issues & Limitations
 
-- 📝 **Notifications**: Toggle exists but notification delivery not yet implemented
-- 📝 **Budget Alerts**: Settings stored but alert system not active
+- ✅ **Notifications**: Local notifications integrated for budget alerts
+- ✅ **Budget Alerts**: Full local notification system at 50%, 75%, 90%, 100% thresholds
 - 📝 **Cloud Sync**: No iCloud or multi-device synchronization
-- 📝 **Export**: No CSV/PDF export functionality (coming soon)
-- 📝 **Edit Expenses**: Expenses can only be deleted, not edited (workaround: delete and re-add)
+- ✅ **Export**: CSV export fully implemented
+- ✅ **Edit Expenses**: Full edit functionality via EditExpenseView
 
 ## Troubleshooting
 
@@ -285,3 +285,36 @@ Found a bug? Have a feature request?
 ---
 
 **Made with ❤️ by the ExpenseFlow team**
+
+---
+
+## Recently Implemented Features (September 2026)
+
+✨ **Latest Additions** to ExpenseFlow:
+
+### 🔔 Budget Alert Notifications
+- Real-time local notifications at 50%, 75%, 90%, and 100% of monthly budget
+- Prevents duplicate alerts within the same billing cycle
+- Automatically syncs on app launch and settings changes
+- See `BudgetAlertService.swift` for implementation
+
+### 📸 Receipt Image Support
+- Add receipt images to expenses for documentation
+- Compressed JPEG storage for efficiency
+- Secure persistence in app Documents directory
+- See `ImageStorageManager.swift` and `Expense.receiptImageFileName`
+
+### 🔍 Advanced Search & Filtering API
+- Search expenses by title or notes (case-insensitive)
+- Filter by category, date range, or amount
+- Combine multiple filters for powerful queries
+- See `ExpenseStore` search methods:
+  - `searchExpenses(query:)`
+  - `filterByCategory(_:)`
+  - `filterByDateRange(_:_:)`
+  - `filterByAmount(min:max:)`
+  - `combineFilters(...)`
+
+For detailed implementation notes, see `FEATURES_IMPLEMENTED.md`.
+
+---

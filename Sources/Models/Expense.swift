@@ -9,6 +9,7 @@ struct Expense: Identifiable, Codable, Hashable {
     var customCategoryColorHex: String?
     var date: Date
     var notes: String
+    var receiptImageFileName: String?
 
     init(
         id: UUID = UUID(),
@@ -18,7 +19,8 @@ struct Expense: Identifiable, Codable, Hashable {
         customCategoryName: String? = nil,
         customCategoryColorHex: String? = nil,
         date: Date,
-        notes: String = ""
+        notes: String = "",
+        receiptImageFileName: String? = nil
     ) {
         self.id = id
         self.title = title
@@ -28,5 +30,6 @@ struct Expense: Identifiable, Codable, Hashable {
         self.customCategoryColorHex = customCategoryColorHex
         self.date = date
         self.notes = notes
+        self.receiptImageFileName = receiptImageFileName
     }
 }

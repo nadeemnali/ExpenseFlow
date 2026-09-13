@@ -31,6 +31,7 @@ struct AppRootView: View {
             }
 
             synchronizeRecurringFeatures()
+            synchronizeBudgetAlerts()
         }
         .onChange(of: recurringExpenseStore.recurringExpenses) { _ in
             synchronizeRecurringFeatures()
@@ -38,9 +39,17 @@ struct AppRootView: View {
         .onChange(of: settingsStore.notificationsEnabled) { _ in
             synchronizeReminderSchedule()
         }
+        .onChange(of: settingsStore.budgetAlertsEnabled) { newValue in
+            if newValue {
+                synchronizeBudgetAlerts()
+            } else {
+                BudgetAlertService.shared.clearBudgetAlerts()
+            }
+        }
         .onChange(of: scenePhase) { newPhase in
             guard newPhase == .active else { return }
             synchronizeRecurringFeatures()
+            synchronizeBudgetAlerts()
         }
     }
 
@@ -53,6 +62,20 @@ struct AppRootView: View {
         BillReminderService.shared.syncReminders(
             isEnabled: settingsStore.notificationsEnabled,
             from: recurringExpenseStore
+        )
+    }
+    
+    private func synchronizeBudgetAlerts() {
+        guard settingsStore.budgetAlertsEnabled else {
+            BudgetAlertService.shared.clearBudgetAlerts()
+            return
+        }
+        
+        let currentMonthlySpending = expenseStore.monthlyTotal(for: Date())
+        BudgetAlertService.shared.checkAndScheduleBudgetAlert(
+            currentMonthlySpending: currentMonthlySpending,
+            monthlyBudget: settingsStore.monthlyBudget,
+            currencyCode: settingsStore.currencyCode
         )
     }
 }

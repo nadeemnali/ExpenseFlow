@@ -118,6 +118,82 @@ final class ExpenseStore: ObservableObject {
         Array(expenses.prefix(limit))
     }
 
+    // MARK: - Search & Filter API
+    
+    func searchExpenses(query: String) -> [Expense] {
+        guard !query.trimmingCharacters(in: .whitespaces).isEmpty else {
+            return expenses
+        }
+        
+        let lowercaseQuery = query.lowercased()
+        return expenses.filter { expense in
+            expense.title.lowercased().contains(lowercaseQuery) ||
+            expense.notes.lowercased().contains(lowercaseQuery) ||
+            (expense.customCategoryName?.lowercased().contains(lowercaseQuery) ?? false)
+        }
+    }
+    
+    func filterByCategory(_ category: ExpenseCategory) -> [Expense] {
+        expenses.filter { $0.category == category }
+    }
+    
+    func filterByDateRange(_ start: Date, through end: Date) -> [Expense] {
+        let calendar = Calendar.current
+        let startOfDay = calendar.startOfDay(for: start)
+        let endOfDay = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: end)) ?? end
+        
+        return expenses.filter { expense in
+            expense.date >= startOfDay && expense.date < endOfDay
+        }
+    }
+    
+    func filterByAmount(min: Double? = nil, max: Double? = nil) -> [Expense] {
+        expenses.filter { expense in
+            (min == nil || expense.amount >= min!) &&
+            (max == nil || expense.amount <= max!)
+        }
+    }
+    
+    func combineFilters(
+        query: String? = nil,
+        category: ExpenseCategory? = nil,
+        startDate: Date? = nil,
+        endDate: Date? = nil,
+        minAmount: Double? = nil,
+        maxAmount: Double? = nil
+    ) -> [Expense] {
+        var results = expenses
+        
+        if let query = query, !query.trimmingCharacters(in: .whitespaces).isEmpty {
+            results = results.filter { expense in
+                let lowercaseQuery = query.lowercased()
+                return expense.title.lowercased().contains(lowercaseQuery) ||
+                       expense.notes.lowercased().contains(lowercaseQuery)
+            }
+        }
+        
+        if let category = category {
+            results = results.filter { $0.category == category }
+        }
+        
+        if let startDate = startDate, let endDate = endDate {
+            let calendar = Calendar.current
+            let startOfDay = calendar.startOfDay(for: startDate)
+            let endOfDay = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: endDate)) ?? endDate
+            results = results.filter { $0.date >= startOfDay && $0.date < endOfDay }
+        }
+        
+        if let minAmount = minAmount {
+            results = results.filter { $0.amount >= minAmount }
+        }
+        
+        if let maxAmount = maxAmount {
+            results = results.filter { $0.amount <= maxAmount }
+        }
+        
+        return results
+    }
+
     func resetToSample() {
         expenses = ExpenseStore.sample
         AppLogger.log("Reset expenses to sample data", category: .storage, level: .info)
