@@ -23,24 +23,29 @@ final class RecurringExpenseStore: ObservableObject {
     
     func add(_ expense: RecurringExpense) {
         recurringExpenses.append(expense)
+        save()
     }
     
     func update(_ expense: RecurringExpense) {
         if let index = recurringExpenses.firstIndex(where: { $0.id == expense.id }) {
             recurringExpenses[index] = expense
         }
+        save()
     }
     
     func delete(_ id: UUID) {
         recurringExpenses.removeAll { $0.id == id }
+        save()
     }
     
     func delete(_ expense: RecurringExpense) {
-        delete(expense.id)
+        recurringExpenses.removeAll { $0.id == expense.id }
+        save()
     }
 
     func replaceAll(_ expenses: [RecurringExpense]) {
         recurringExpenses = expenses
+        save()
     }
     
     func get(_ id: UUID) -> RecurringExpense? {
@@ -104,10 +109,11 @@ final class RecurringExpenseStore: ObservableObject {
         }
     }
     
-    private func save() {
+    func save() {
         do {
             let data = try JSONEncoder().encode(recurringExpenses)
             UserDefaults.standard.set(data, forKey: storageKey)
+            UserDefaults.standard.synchronize()
             saveError = nil
             AppLogger.debug("Recurring expenses saved successfully (\(recurringExpenses.count) items)", category: .storage)
         } catch {

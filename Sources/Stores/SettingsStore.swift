@@ -3,12 +3,24 @@ import Combine
 import os.log
 
 final class SettingsStore: ObservableObject {
-    @Published var monthlyBudget: Double = 1200
-    @Published var currencyCode: String = Locale.current.currency?.identifier ?? "USD"
-    @Published var notificationsEnabled: Bool = true
-    @Published var budgetAlertsEnabled: Bool = true
-    @Published var startOfWeek: WeekStart = .monday
-    @Published var colorScheme: ColorSchemeOption = .system
+    @Published var monthlyBudget: Double = 1200 {
+        didSet { save() }
+    }
+    @Published var currencyCode: String = Locale.current.currency?.identifier ?? "USD" {
+        didSet { save() }
+    }
+    @Published var notificationsEnabled: Bool = true {
+        didSet { save() }
+    }
+    @Published var budgetAlertsEnabled: Bool = true {
+        didSet { save() }
+    }
+    @Published var startOfWeek: WeekStart = .monday {
+        didSet { save() }
+    }
+    @Published var colorScheme: ColorSchemeOption = .system {
+        didSet { save() }
+    }
     @Published var saveError: String?
 
     private let settingsKey = "ExpenseFlow.settings"
@@ -16,23 +28,6 @@ final class SettingsStore: ObservableObject {
 
     init() {
         load()
-        Publishers.CombineLatest4($monthlyBudget, $currencyCode, $notificationsEnabled, $startOfWeek)
-            .sink { [weak self] _ in
-                self?.save()
-            }
-            .store(in: &cancellables)
-
-        $colorScheme
-            .sink { [weak self] _ in
-                self?.save()
-            }
-            .store(in: &cancellables)
-
-        $budgetAlertsEnabled
-            .sink { [weak self] _ in
-                self?.save()
-            }
-            .store(in: &cancellables)
     }
 
     var preferredColorScheme: ColorScheme? {
@@ -85,7 +80,7 @@ final class SettingsStore: ObservableObject {
         }
     }
 
-    private func save() {
+    func save() {
         let settings = AppSettings(
             monthlyBudget: monthlyBudget,
             currencyCode: currencyCode,
@@ -98,6 +93,7 @@ final class SettingsStore: ObservableObject {
         do {
             let data = try JSONEncoder().encode(settings)
             UserDefaults.standard.set(data, forKey: settingsKey)
+            UserDefaults.standard.synchronize()
             saveError = nil
             AppLogger.debug("Settings saved successfully", category: .storage)
         } catch {

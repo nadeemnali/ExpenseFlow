@@ -4,6 +4,7 @@ final class OnboardingStore: ObservableObject {
     @Published var hasSeenOnboarding: Bool {
         didSet {
             UserDefaults.standard.set(hasSeenOnboarding, forKey: key)
+            UserDefaults.standard.synchronize()
         }
     }
 

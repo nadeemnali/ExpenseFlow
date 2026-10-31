@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SubscriptionsVaultView: View {
     @EnvironmentObject private var recurringExpenseStore: RecurringExpenseStore
+    @EnvironmentObject private var settingsStore: SettingsStore
     
     var body: some View {
         BackgroundView {
@@ -60,7 +61,7 @@ struct SubscriptionsVaultView: View {
                                 .font(AppTheme.body(12))
                                 .foregroundStyle(AppTheme.ink.opacity(0.6))
                             
-                            Text(Formatters.currencyString(monthlySubscriptionCost()))
+                            Text(Formatters.currencyString(monthlySubscriptionCost(), code: settingsStore.currencyCode))
                                 .font(AppTheme.title(20))
                                 .foregroundStyle(AppTheme.ocean)
                         }
@@ -70,7 +71,7 @@ struct SubscriptionsVaultView: View {
                                 .font(AppTheme.body(12))
                                 .foregroundStyle(AppTheme.ink.opacity(0.6))
                             
-                            Text(Formatters.currencyString(yearlySubscriptionCost()))
+                            Text(Formatters.currencyString(yearlySubscriptionCost(), code: settingsStore.currencyCode))
                                 .font(AppTheme.title(20))
                                 .foregroundStyle(AppTheme.coral)
                         }
@@ -101,7 +102,7 @@ struct SubscriptionsVaultView: View {
             
             VStack(spacing: 12) {
                 ForEach(recurringExpenseStore.subscriptions.sorted { $0.yearlyAmount > $1.yearlyAmount }) { subscription in
-                    SubscriptionCard(subscription: subscription)
+                    SubscriptionCard(subscription: subscription, currencyCode: settingsStore.currencyCode)
                 }
             }
         }
@@ -121,6 +122,7 @@ struct SubscriptionsVaultView: View {
 
 struct SubscriptionCard: View {
     let subscription: RecurringExpense
+    let currencyCode: String
     
     var body: some View {
         HStack(spacing: 12) {
@@ -154,11 +156,11 @@ struct SubscriptionCard: View {
             Spacer()
             
             VStack(alignment: .trailing, spacing: 4) {
-                Text(Formatters.currencyString(subscription.amount) + "/" + subscription.frequency.rawValue.prefix(3).lowercased())
+                Text(Formatters.currencyString(subscription.amount, code: currencyCode) + "/" + subscription.frequency.rawValue.prefix(3).lowercased())
                     .font(AppTheme.body(13))
                     .foregroundStyle(AppTheme.ink)
                 
-                Text("≈ \(Formatters.currencyString(subscription.yearlyAmount))/yr")
+                Text("≈ \(Formatters.currencyString(subscription.yearlyAmount, code: currencyCode))/yr")
                     .font(AppTheme.body(11))
                     .foregroundStyle(AppTheme.ink.opacity(0.6))
             }

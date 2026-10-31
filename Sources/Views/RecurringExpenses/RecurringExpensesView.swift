@@ -2,6 +2,7 @@ import SwiftUI
 
 struct RecurringExpensesView: View {
     @EnvironmentObject private var recurringExpenseStore: RecurringExpenseStore
+    @EnvironmentObject private var settingsStore: SettingsStore
     @State private var showAddRecurring = false
     @State private var selectedExpense: RecurringExpense?
     
@@ -93,6 +94,7 @@ struct RecurringExpensesView: View {
                     ForEach(recurringExpenseStore.recurringExpenses) { expense in
                         RecurringExpenseRow(
                             expense: expense,
+                            currencyCode: settingsStore.currencyCode,
                             onTap: { selectedExpense = expense },
                             onDelete: { recurringExpenseStore.delete(expense) },
                             onToggle: {
@@ -122,7 +124,7 @@ struct RecurringExpensesView: View {
                             .font(AppTheme.body(12))
                             .foregroundStyle(AppTheme.ink.opacity(0.6))
                         
-                        Text(Formatters.currencyString(recurringExpenseStore.monthlyRecurringAmount))
+                        Text(Formatters.currencyString(recurringExpenseStore.monthlyRecurringAmount, code: settingsStore.currencyCode))
                             .font(AppTheme.title(18))
                             .foregroundStyle(AppTheme.ocean)
                     }
@@ -134,7 +136,7 @@ struct RecurringExpensesView: View {
                             .font(AppTheme.body(12))
                             .foregroundStyle(AppTheme.ink.opacity(0.6))
                         
-                        Text(Formatters.currencyString(recurringExpenseStore.totalYearlyAmount))
+                        Text(Formatters.currencyString(recurringExpenseStore.totalYearlyAmount, code: settingsStore.currencyCode))
                             .font(AppTheme.title(18))
                             .foregroundStyle(AppTheme.coral)
                     }
@@ -146,6 +148,7 @@ struct RecurringExpensesView: View {
 
 struct RecurringExpenseRow: View {
     let expense: RecurringExpense
+    let currencyCode: String
     let onTap: () -> Void
     let onDelete: () -> Void
     let onToggle: () -> Void
@@ -185,11 +188,11 @@ struct RecurringExpenseRow: View {
                 Spacer()
                 
                 VStack(alignment: .trailing, spacing: 4) {
-                    Text(Formatters.currencyString(expense.amount))
+                    Text(Formatters.currencyString(expense.amount, code: currencyCode))
                         .font(AppTheme.body(14))
                         .foregroundStyle(AppTheme.ink)
                     
-                    Text("Yearly: \(Formatters.currencyString(expense.yearlyAmount))")
+                    Text("Yearly: \(Formatters.currencyString(expense.yearlyAmount, code: currencyCode))")
                         .font(AppTheme.body(11))
                         .foregroundStyle(AppTheme.ink.opacity(0.6))
                 }

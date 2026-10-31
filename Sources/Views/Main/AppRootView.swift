@@ -61,7 +61,8 @@ struct AppRootView: View {
     private func synchronizeReminderSchedule() {
         BillReminderService.shared.syncReminders(
             isEnabled: settingsStore.notificationsEnabled,
-            from: recurringExpenseStore
+            from: recurringExpenseStore,
+            currencyCode: settingsStore.currencyCode
         )
     }
     

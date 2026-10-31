@@ -71,6 +71,7 @@
 		CDD9EA116937C27B0818F255 /* TabBarPaddingModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7ED1179CD6A05C0B43D28B45 /* TabBarPaddingModifier.swift */; };
 		D345E92AD86B4218E4F170C5 /* AddExpenseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C7DA97B8EFE649BF259ACD0 /* AddExpenseView.swift */; };
 		DD8DBE2B11C2082052D0A344 /* BudgetAlertService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3FF924B95D7423EAC677A96 /* BudgetAlertService.swift */; };
+		DE437766D46F8909EE1E1A07 /* ExpenseFlowLogo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF0B52A602EB066640EE704 /* ExpenseFlowLogo.swift */; };
 		DF979A17D374F732FDE21205 /* SocialAuthSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1092A49E66974D5DE180743D /* SocialAuthSection.swift */; };
 		E082C121EC538014ED8F8A7D /* BackupDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FA0A0F43DA5EBA517F46A73 /* BackupDocument.swift */; };
 		F0E9A50582D0B6197FBE93EC /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C82FAF51619AC02FC762771 /* DashboardView.swift */; };
@@ -91,6 +92,7 @@
 		0475033586BFE8DBA63BAD2A /* ExpenseStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseStoreTests.swift; sourceTree = "<group>"; };
 		060D82D687F91139F090F82B /* SectionHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionHeader.swift; sourceTree = "<group>"; };
 		08CF8F4F55B7FE0DF431419C /* PremiumLockedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PremiumLockedView.swift; sourceTree = "<group>"; };
+		0DF0B52A602EB066640EE704 /* ExpenseFlowLogo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseFlowLogo.swift; sourceTree = "<group>"; };
 		1092A49E66974D5DE180743D /* SocialAuthSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialAuthSection.swift; sourceTree = "<group>"; };
 		1397C6969080D756434B1862 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
 		1A62AFCF686FEC8686FD7707 /* BackgroundView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundView.swift; sourceTree = "<group>"; };
@@ -375,6 +377,7 @@
 			children = (
 				1A62AFCF686FEC8686FD7707 /* BackgroundView.swift */,
 				63DB13706B10E6BDEAF3A2E0 /* CategoryPill.swift */,
+				0DF0B52A602EB066640EE704 /* ExpenseFlowLogo.swift */,
 				A2C98433A14B6B04D05DEB3D /* GlassCard.swift */,
 				1ED5D97E0053F15153819283 /* ListRowStyleModifier.swift */,
 				62D623ED7BB24B9299871EDF /* MiniStatCard.swift */,
@@ -515,6 +518,7 @@
 				2E89633C0183646D767464B5 /* Expense.swift in Sources */,
 				24F3A9D0DA434C0587DD7534 /* ExpenseCategory.swift in Sources */,
 				5790BF732294230338352A92 /* ExpenseFlowApp.swift in Sources */,
+				DE437766D46F8909EE1E1A07 /* ExpenseFlowLogo.swift in Sources */,
 				3ACBF609DA81FF97C17EE5AB /* ExpenseStore.swift in Sources */,
 				601E02E0070A7944FBF8FEA5 /* Formatters.swift in Sources */,
 				52D149F6183C656D172265A8 /* GlassCard.swift in Sources */,

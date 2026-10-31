@@ -139,6 +139,7 @@ class PremiumFeatureStore: NSObject, ObservableObject {
     private func setPremiumStatus(_ isPremium: Bool) {
         self.isPremium = isPremium
         UserDefaults.standard.set(isPremium, forKey: Self.premiumPurchasedKey)
+        UserDefaults.standard.synchronize()
     }
 }
 

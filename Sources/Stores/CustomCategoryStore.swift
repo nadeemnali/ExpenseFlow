@@ -36,14 +36,17 @@ final class CustomCategoryStore: ObservableObject {
             return
         }
         categories.append(CustomCategory(name: trimmed, colorHex: colorHex))
+        save()
     }
 
     func delete(_ category: CustomCategory) {
         categories.removeAll { $0.id == category.id }
+        save()
     }
 
     func replaceAll(_ categories: [CustomCategory]) {
         self.categories = categories
+        save()
     }
 
     func category(named name: String) -> CustomCategory? {
@@ -63,9 +66,10 @@ final class CustomCategoryStore: ObservableObject {
         }
     }
 
-    private func save() {
+    func save() {
         if let data = try? JSONEncoder().encode(categories) {
             UserDefaults.standard.set(data, forKey: storageKey)
+            UserDefaults.standard.synchronize()
         }
     }
 

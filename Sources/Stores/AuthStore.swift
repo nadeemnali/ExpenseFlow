@@ -244,6 +244,7 @@ final class AuthStore: ObservableObject {
         UserDefaults.standard.set(false, forKey: loggedInKey)
         UserDefaults.standard.removeObject(forKey: currentUserIDKey)
         UserDefaults.standard.removeObject(forKey: credentialsKey)
+        UserDefaults.standard.synchronize()
 
         AppLogger.log("Logout for \(previousEmail)", category: .auth, level: .info)
     }
@@ -263,6 +264,7 @@ final class AuthStore: ObservableObject {
         do {
             let data = try JSONEncoder().encode(accounts)
             UserDefaults.standard.set(data, forKey: accountsKey)
+            UserDefaults.standard.synchronize()
         } catch {
             AppLogger.error("Failed to save auth accounts", error: error, category: .auth)
         }
@@ -337,6 +339,7 @@ final class AuthStore: ObservableObject {
         UserDefaults.standard.set(true, forKey: loggedInKey)
         UserDefaults.standard.set(account.email, forKey: credentialsKey)
         UserDefaults.standard.set(account.id.uuidString, forKey: currentUserIDKey)
+        UserDefaults.standard.synchronize()
     }
 
     private func account(forEmail normalizedEmail: String) -> AuthAccount? {

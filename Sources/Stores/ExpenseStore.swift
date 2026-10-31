@@ -53,6 +53,7 @@ final class ExpenseStore: ObservableObject {
         }
         
         UserDefaults.standard.set(today, forKey: lastAutoGenerateKey)
+        UserDefaults.standard.synchronize()
         AppLogger.log("Auto-generated recurring expenses", category: .storage, level: .debug)
     }
 
@@ -62,10 +63,12 @@ final class ExpenseStore: ObservableObject {
             return
         }
         expenses.insert(expense, at: 0)
+        save()
     }
 
     func deleteExpense(id: UUID) {
         expenses.removeAll { $0.id == id }
+        save()
     }
 
     func updateExpense(_ updated: Expense) {
@@ -74,6 +77,7 @@ final class ExpenseStore: ObservableObject {
             return
         }
         expenses[index] = updated
+        save()
     }
 
     func dailyTotal(for date: Date) -> Double {
@@ -196,16 +200,19 @@ final class ExpenseStore: ObservableObject {
 
     func resetToSample() {
         expenses = ExpenseStore.sample
+        save()
         AppLogger.log("Reset expenses to sample data", category: .storage, level: .info)
     }
 
     func clearAll() {
         expenses = []
+        save()
         AppLogger.log("Cleared all expenses", category: .storage, level: .info)
     }
 
     func replaceAll(_ expenses: [Expense]) {
         self.expenses = expenses.sorted(by: { $0.date > $1.date })
+        save()
         AppLogger.log("Replaced expenses from backup", category: .storage, level: .info)
     }
 
@@ -231,7 +238,7 @@ final class ExpenseStore: ObservableObject {
         }
     }
 
-    private func save() {
+    func save() {
         let url = fileURL
         
         do {

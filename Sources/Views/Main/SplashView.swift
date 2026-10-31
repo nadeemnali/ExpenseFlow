@@ -1,55 +1,92 @@
 import SwiftUI
 
 struct SplashView: View {
-    @State private var pulse = false
-    @State private var shimmer = false
+    @State private var showContent = false
+    @State private var loadingProgress: Double = 0
 
     var body: some View {
-        BackgroundView {
-            VStack(spacing: 20) {
+        ZStack {
+            // Animated gradient background
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    AppTheme.cloud.opacity(0.4),
+                    AppTheme.ocean.opacity(0.05)
+                ]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+            
+            VStack(spacing: 0) {
                 Spacer()
 
-                ZStack {
-                    Circle()
-                        .fill(AppTheme.coral.opacity(0.18))
-                        .frame(width: 200, height: 200)
-                        .scaleEffect(pulse ? 1.05 : 0.92)
-                        .animation(.easeInOut(duration: 1.4).repeatForever(autoreverses: true), value: pulse)
+                // Logo with animation
+                VStack(spacing: 24) {
+                    ExpenseFlowLogo(size: 140, showAnimation: true)
+                        .scaleEffect(showContent ? 1.0 : 0.8)
+                        .opacity(showContent ? 1.0 : 0)
 
-                    Circle()
-                        .stroke(AppTheme.mango.opacity(0.35), lineWidth: 18)
-                        .frame(width: 170, height: 170)
-                        .rotationEffect(.degrees(shimmer ? 360 : 0))
-                        .animation(.linear(duration: 6).repeatForever(autoreverses: false), value: shimmer)
+                    VStack(spacing: 12) {
+                        Text("ExpenseFlow")
+                            .font(AppTheme.display(32))
+                            .fontWeight(.bold)
+                            .foregroundStyle(AppTheme.ink)
+                            .tracking(0.5)
 
-                    Image(systemName: "sparkles")
-                        .font(.system(size: 54, weight: .bold))
-                        .foregroundStyle(AppTheme.accentGradient)
-                        .shadow(color: AppTheme.coral.opacity(0.35), radius: 12, x: 0, y: 10)
+                        Text("Smart Expense Tracking")
+                            .font(AppTheme.body(14))
+                            .foregroundStyle(AppTheme.ink.opacity(0.6))
+                            .tracking(0.3)
+                    }
+                    .opacity(showContent ? 1.0 : 0)
+                    .offset(y: showContent ? 0 : 20)
                 }
-
-                VStack(spacing: 8) {
-                    Text("ExpenseFlow")
-                        .font(AppTheme.display(30))
-                        .foregroundStyle(AppTheme.ink)
-
-                    Text("Color your daily spend")
-                        .font(AppTheme.body(14))
-                        .foregroundStyle(AppTheme.ink.opacity(0.7))
-                }
+                .animation(.easeOut(duration: 0.8).delay(0.2), value: showContent)
 
                 Spacer()
 
-                Text("Loading")
-                    .font(AppTheme.body(12))
-                    .foregroundStyle(AppTheme.ink.opacity(0.5))
-                    .padding(.bottom, 24)
+                // Loading indicator
+                VStack(spacing: 12) {
+                    // Progress bar
+                    ZStack(alignment: .leading) {
+                        RoundedRectangle(cornerRadius: 2)
+                            .fill(AppTheme.cloud.opacity(0.3))
+                            .frame(height: 4)
+
+                        RoundedRectangle(cornerRadius: 2)
+                            .fill(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [AppTheme.ocean, AppTheme.teal]),
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .frame(width: 120 * loadingProgress, height: 4)
+                            .animation(.easeInOut(duration: 1.5), value: loadingProgress)
+                    }
+                    .frame(width: 120)
+
+                    Text("Loading")
+                        .font(AppTheme.body(12))
+                        .foregroundStyle(AppTheme.ink.opacity(0.5))
+                }
+                .padding(.bottom, 32)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .onAppear {
-            pulse = true
-            shimmer = true
+            showContent = true
+            
+            // Simulate loading progress
+            var progress = 0.0
+            Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { timer in
+                progress += Double.random(in: 0.1...0.3)
+                loadingProgress = min(progress, 0.95)
+                
+                if loadingProgress >= 0.95 {
+                    timer.invalidate()
+                }
+            }
         }
     }
 }

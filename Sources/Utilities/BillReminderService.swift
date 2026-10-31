@@ -21,7 +21,7 @@ final class BillReminderService {
         }
     }
     
-    func scheduleReminders(for recurringExpense: RecurringExpense) {
+    func scheduleReminders(for recurringExpense: RecurringExpense, currencyCode: String = "USD") {
         guard recurringExpense.notificationEnabled else {
             removePendingReminders(for: recurringExpense.id)
             return
@@ -50,20 +50,21 @@ final class BillReminderService {
             scheduleNotification(
                 for: recurringExpense,
                 dueDate: dueDate,
-                at: reminderDate
+                at: reminderDate,
+                currencyCode: currencyCode
             )
         }
     }
     
-    func scheduleAllReminders(from recurringExpenseStore: RecurringExpenseStore) {
+    func scheduleAllReminders(from recurringExpenseStore: RecurringExpenseStore, currencyCode: String = "USD") {
         removeAllPendingReminders()
         
         for expense in recurringExpenseStore.activeRecurringExpenses where expense.notificationEnabled {
-            scheduleReminders(for: expense)
+            scheduleReminders(for: expense, currencyCode: currencyCode)
         }
     }
 
-    func syncReminders(isEnabled: Bool, from recurringExpenseStore: RecurringExpenseStore) {
+    func syncReminders(isEnabled: Bool, from recurringExpenseStore: RecurringExpenseStore, currencyCode: String = "USD") {
         guard isEnabled else {
             removeAllPendingReminders()
             return
@@ -74,11 +75,11 @@ final class BillReminderService {
 
             switch settings.authorizationStatus {
             case .authorized, .provisional, .ephemeral:
-                self.scheduleAllRemindersOnMain(from: recurringExpenseStore)
+                self.scheduleAllRemindersOnMain(from: recurringExpenseStore, currencyCode: currencyCode)
             case .notDetermined:
                 self.requestNotificationPermission { granted in
                     if granted {
-                        self.scheduleAllRemindersOnMain(from: recurringExpenseStore)
+                        self.scheduleAllRemindersOnMain(from: recurringExpenseStore, currencyCode: currencyCode)
                     } else {
                         self.removeAllPendingReminders()
                     }
@@ -91,16 +92,16 @@ final class BillReminderService {
         }
     }
 
-    private func scheduleAllRemindersOnMain(from recurringExpenseStore: RecurringExpenseStore) {
+    private func scheduleAllRemindersOnMain(from recurringExpenseStore: RecurringExpenseStore, currencyCode: String = "USD") {
         DispatchQueue.main.async {
-            self.scheduleAllReminders(from: recurringExpenseStore)
+            self.scheduleAllReminders(from: recurringExpenseStore, currencyCode: currencyCode)
         }
     }
     
-    private func scheduleNotification(for expense: RecurringExpense, dueDate: Date, at date: Date) {
+    private func scheduleNotification(for expense: RecurringExpense, dueDate: Date, at date: Date, currencyCode: String = "USD") {
         let content = UNMutableNotificationContent()
         content.title = "Bill Due Soon"
-        content.body = "\(expense.title): \(Formatters.currencyString(expense.amount))"
+        content.body = "\(expense.title): \(Formatters.currencyString(expense.amount, code: currencyCode))"
         content.sound = .default
         content.badge = NSNumber(value: 1)
         
